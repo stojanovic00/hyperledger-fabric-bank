@@ -1,1 +1,10 @@
+# Visual Studio Code
+*.vscode/
+*.settings/
+
+# JetBrains IDEs
 *.idea/
+*.iml
+*.ipr
+*.iws
+*.idea_modules/
