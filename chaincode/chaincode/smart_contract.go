@@ -4,6 +4,7 @@ import (
 	"chaincode/model"
 	"encoding/json"
 	"fmt"
+
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -92,4 +93,70 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 	}
 
 	return nil
+}
+
+func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInterface, id string, currency model.Currency, cards []string, bankId string, userID string) error {
+	accountExists, err := s.Exists(ctx, id)
+	if err != nil {
+		return err
+	}
+	if accountExists {
+		return fmt.Errorf("the bank account with id %s already exists", id)
+	}
+
+	userExists, err := s.Exists(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if !userExists {
+		return fmt.Errorf("no registered user with id %s", userID)
+	}
+
+	bank, err := s.ReadBank(ctx, bankId)
+	if err != nil {
+		return err
+	}
+
+	bankAccount := model.BankAccount{
+		ID:       id,
+		Currency: currency,
+		Balance:  0.0,
+		Cards:    cards,
+		Bank:     *bank,
+		UserID:   userID,
+	}
+
+	bankAccountJSON, err := json.Marshal(bankAccount)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, bankAccountJSON)
+}
+
+func (s *SmartContract) ReadBank(ctx contractapi.TransactionContextInterface, id string) (*model.Bank, error) {
+	bankJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if bankJSON == nil {
+		return nil, fmt.Errorf("the bank with id %s does not exist", id)
+	}
+
+	var bank model.Bank
+	err = json.Unmarshal(bankJSON, &bank)
+
+	if err != nil {
+		return nil, err
+	}
+	return &bank, nil
+}
+
+func (s *SmartContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	someJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return false, fmt.Errorf("failed to read from world state: %v", err)
+	}
+
+	return someJSON != nil, nil
 }
