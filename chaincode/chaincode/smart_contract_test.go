@@ -211,3 +211,20 @@ func TestTransferMoney_DifferentCurrenciesWithConfirmation(t *testing.T) {
 	require.True(t, confirmation)
 	require.Nil(t, err)
 }
+
+func TestAddUser(t *testing.T) {
+	//Arrange
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	contract := chaincode.SmartContract{}
+
+	//Happy path
+	err := contract.AddUser(transactionContext, "u1", "Aleksandar", "Stojanovic", "aleksandar@gmail.com")
+	require.NoError(t, err)
+
+	//Already exists
+	chaincodeStub.GetStateReturns([]byte{}, nil)
+	err = contract.AddUser(transactionContext, "u1", "Aleksandar", "Stojanovic", "aleksandar@gmail.com")
+	require.EqualError(t, err, "the user u1 already exists")
+}
