@@ -45,3 +45,19 @@ func TestInitLedger(t *testing.T) {
 	err = contract.InitLedger(transactionContext)
 	require.EqualError(t, err, "failed to put to world state. failed inserting key")
 }
+func TestAddUser(t *testing.T) {
+	//Arrange
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	contract := chaincode.SmartContract{}
+
+	//Happy path
+	err := contract.AddUser(transactionContext, "u1", "Aleksandar", "Stojanovic", "aleksandar@gmail.com")
+	require.NoError(t, err)
+
+	//Already exists
+	chaincodeStub.GetStateReturns([]byte{}, nil)
+	err = contract.AddUser(transactionContext, "u1", "Aleksandar", "Stojanovic", "aleksandar@gmail.com")
+	require.EqualError(t, err, "the user u1 already exists")
+}

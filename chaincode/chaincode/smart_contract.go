@@ -93,3 +93,35 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 
 	return nil
 }
+
+func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	assetJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return false, fmt.Errorf("failed to read from world state: %v", err)
+	}
+
+	return assetJSON != nil, nil
+}
+
+// TODO: automatically generate unique ID by first querying CouchDb for all users
+func (s *SmartContract) AddUser(ctx contractapi.TransactionContextInterface, id, name, surname, email string) error {
+	exists, err := s.AssetExists(ctx, id)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("the user %s already exists", id)
+	}
+	user := model.User{
+		ID:      id,
+		Name:    name,
+		Surname: surname,
+		Email:   email,
+	}
+	userJson, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, userJson)
+}
