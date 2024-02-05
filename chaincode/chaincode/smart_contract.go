@@ -96,7 +96,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 }
 
 func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInterface, id string, currency model.Currency, cards []string, bankId string, userID string) error {
-	accountExists, err := s.Exists(ctx, id)
+	accountExists, err := s.AssetExists(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("the bank account with id %s already exists", id)
 	}
 
-	userExists, err := s.Exists(ctx, userID)
+	userExists, err := s.AssetExists(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -152,13 +152,13 @@ func (s *SmartContract) ReadBank(ctx contractapi.TransactionContextInterface, id
 	return &bank, nil
 }
 
-func (s *SmartContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	someJSON, err := ctx.GetStub().GetState(id)
+func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	assetJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return false, fmt.Errorf("failed to read from world state: %v", err)
 	}
 
-	return someJSON != nil, nil
+	return assetJSON != nil, nil
 }
 
 func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterface, srcAccount string, dstAccount string, amount float64, confirmation bool) (bool, error) {
@@ -228,4 +228,27 @@ func (s *SmartContract) ReadBankAccount(ctx contractapi.TransactionContextInterf
 		return nil, err
 	}
 	return &bankAccount, nil
+}
+
+// TODO: automatically generate unique ID by first querying CouchDb for all users
+func (s *SmartContract) AddUser(ctx contractapi.TransactionContextInterface, id, name, surname, email string) error {
+	exists, err := s.AssetExists(ctx, id)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("the user %s already exists", id)
+	}
+	user := model.User{
+		ID:      id,
+		Name:    name,
+		Surname: surname,
+		Email:   email,
+	}
+	userJson, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, userJson)
 }
