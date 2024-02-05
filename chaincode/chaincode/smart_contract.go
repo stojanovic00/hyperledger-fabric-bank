@@ -96,7 +96,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 }
 
 func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInterface, id string, currency model.Currency, cards []string, bankId string, userID string) error {
-	accountExists, err := s.Exists(ctx, id)
+	accountExists, err := s.AssetExists(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("the bank account with id %s already exists", id)
 	}
 
-	userExists, err := s.Exists(ctx, userID)
+	userExists, err := s.AssetExists(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -134,6 +134,32 @@ func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInte
 	return ctx.GetStub().PutState(id, bankAccountJSON)
 }
 
+func (s *SmartContract) ReadBank(ctx contractapi.TransactionContextInterface, id string) (*model.Bank, error) {
+	bankJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if bankJSON == nil {
+		return nil, fmt.Errorf("the bank with id %s does not exist", id)
+	}
+
+	var bank model.Bank
+	err = json.Unmarshal(bankJSON, &bank)
+
+	if err != nil {
+		return nil, err
+	}
+	return &bank, nil
+}
+
+func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	assetJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return false, fmt.Errorf("failed to read from world state: %v", err)
+	}
+
+	return assetJSON != nil, nil
+}
 func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterface, srcAccount string, dstAccount string, amount float64, confirmation bool) (bool, error) {
 	sourceAccount, err := s.ReadBankAccount(ctx, srcAccount)
 	if err != nil {
@@ -242,20 +268,24 @@ func (s *SmartContract) ReadBankAccount(ctx contractapi.TransactionContextInterf
 	return &bankAccount, nil
 }
 
-func (s *SmartContract) ReadBank(ctx contractapi.TransactionContextInterface, id string) (*model.Bank, error) {
-	bankJSON, err := ctx.GetStub().GetState(id)
+func (s *SmartContract) AddUser(ctx contractapi.TransactionContextInterface, id, name, surname, email string) error {
+	exists, err := s.AssetExists(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state: %v", err)
+		return err
 	}
-	if bankJSON == nil {
-		return nil, fmt.Errorf("the bank with id %s does not exist", id)
+	if exists {
+		return fmt.Errorf("the user %s already exists", id)
+	}
+	user := model.User{
+		ID:      id,
+		Name:    name,
+		Surname: surname,
+		Email:   email,
+	}
+	userJson, err := json.Marshal(user)
+	if err != nil {
+		return err
 	}
 
-	var bank model.Bank
-	err = json.Unmarshal(bankJSON, &bank)
-
-	if err != nil {
-		return nil, err
-	}
-	return &bank, nil
+	return ctx.GetStub().PutState(id, userJson)
 }
