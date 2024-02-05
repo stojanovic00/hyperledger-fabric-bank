@@ -134,33 +134,6 @@ func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInte
 	return ctx.GetStub().PutState(id, bankAccountJSON)
 }
 
-func (s *SmartContract) ReadBank(ctx contractapi.TransactionContextInterface, id string) (*model.Bank, error) {
-	bankJSON, err := ctx.GetStub().GetState(id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state: %v", err)
-	}
-	if bankJSON == nil {
-		return nil, fmt.Errorf("the bank with id %s does not exist", id)
-	}
-
-	var bank model.Bank
-	err = json.Unmarshal(bankJSON, &bank)
-
-	if err != nil {
-		return nil, err
-	}
-	return &bank, nil
-}
-
-func (s *SmartContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	someJSON, err := ctx.GetStub().GetState(id)
-	if err != nil {
-		return false, fmt.Errorf("failed to read from world state: %v", err)
-	}
-
-	return someJSON != nil, nil
-}
-
 func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterface, srcAccount string, dstAccount string, amount float64, confirmation bool) (bool, error) {
 	sourceAccount, err := s.ReadBankAccount(ctx, srcAccount)
 	if err != nil {
@@ -212,6 +185,45 @@ func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterfac
 	return true, nil
 }
 
+func (s *SmartContract) MoneyDepositToAccount(ctx contractapi.TransactionContextInterface, acc string, amount float64) (bool, error) {
+	account, err := s.ReadBankAccount(ctx, acc)
+	fmt.Printf("MoneyDepositToAccount: ReadBankAccount result - Account: %+v, Error: %+v\n", account, err)
+
+	switch account.Currency {
+	case model.EUR:
+		convertedAmount := EurToDin(amount)
+		account.Balance = account.Balance + convertedAmount
+	case model.RSD:
+		convertedAmount := DinToEur(amount)
+		account.Balance = account.Balance + convertedAmount
+	}
+
+	fmt.Printf("MoneyDepositToAccount: Updated balance: %f\n", account.Balance)
+
+	if err != nil {
+		return false, err
+	}
+
+	accountJSON, err := json.Marshal(account)
+	if err != nil {
+		return false, err
+	}
+
+	ctx.GetStub().PutState(account.ID, accountJSON)
+	fmt.Println("MoneyDepositToAccount: End")
+
+	return true, nil
+}
+
+func (s *SmartContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	someJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return false, fmt.Errorf("failed to read from world state: %v", err)
+	}
+
+	return someJSON != nil, nil
+}
+
 func (s *SmartContract) ReadBankAccount(ctx contractapi.TransactionContextInterface, id string) (*model.BankAccount, error) {
 	accJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
@@ -228,4 +240,22 @@ func (s *SmartContract) ReadBankAccount(ctx contractapi.TransactionContextInterf
 		return nil, err
 	}
 	return &bankAccount, nil
+}
+
+func (s *SmartContract) ReadBank(ctx contractapi.TransactionContextInterface, id string) (*model.Bank, error) {
+	bankJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if bankJSON == nil {
+		return nil, fmt.Errorf("the bank with id %s does not exist", id)
+	}
+
+	var bank model.Bank
+	err = json.Unmarshal(bankJSON, &bank)
+
+	if err != nil {
+		return nil, err
+	}
+	return &bank, nil
 }
