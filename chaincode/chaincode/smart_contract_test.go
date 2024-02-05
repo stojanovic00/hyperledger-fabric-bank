@@ -106,3 +106,108 @@ func TestCreateBankAccount_BankDoesNotExist(t *testing.T) {
 	err := smartContract.CreateBankAccount(transactionContext, "a3", model.RSD, []string{"American Express"}, "b2", "u3")
 	require.EqualError(t, err, "the bank with id b2 does not exist")
 }
+
+func TestTransferMoney_EnoughMoney(t *testing.T) {
+	// Setup
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	smartContract := chaincode.SmartContract{} // Correct instantiation
+
+	// Test Case: Enough money in the source account
+	chaincodeStub.GetStateReturnsOnCall(0, []byte(`{"ID":"srcAccount","Currency":0,"Balance":100}`), nil) // Set state to indicate source account exists with EUR currency and balance 100
+	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":0,"Balance":0}`), nil)   // Set state to indicate destination account exists with EUR currency and balance 0
+	chaincodeStub.GetStateReturnsOnCall(2, nil, nil)                                                      // Set state to indicate confirmation user exists
+
+	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 75.0, false)
+	require.True(t, confirmation)
+	require.Nil(t, err)
+}
+
+func TestTransferMoney_NotEnoughMoney(t *testing.T) {
+	// Setup
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	smartContract := chaincode.SmartContract{} // Correct instantiation
+
+	// Test Case: Not enough money in the source account
+	chaincodeStub.GetStateReturnsOnCall(0, []byte(`{"ID":"srcAccount","Currency":0,"Balance":50}`), nil) // Set state to indicate source account exists with EUR currency and balance 50
+	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":0,"Balance":0}`), nil)  // Set state to indicate destination account exists with EUR currency and balance 0
+	chaincodeStub.GetStateReturnsOnCall(2, nil, nil)                                                     // Set state to indicate confirmation user exists
+
+	_, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 100.0, false)
+	require.EqualError(t, err, "not enough money")
+}
+
+func TestTransferMoney_DifferentCurrenciesWithoutConfirmation(t *testing.T) {
+	// Setup
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	smartContract := chaincode.SmartContract{} // Correct instantiation
+
+	// Test Case: Different currencies without confirmation
+	chaincodeStub.GetStateReturnsOnCall(0, []byte(`{"ID":"srcAccount","Currency":0,"Balance":100}`), nil) // Set state to indicate source account exists
+	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":1,"Balance":0}`), nil)   // Set state to indicate destination account exists
+	chaincodeStub.GetStateReturnsOnCall(2, []byte(`{"someUserData":"value"}`), nil)                       // Set state to indicate confirmation user exists
+
+	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 50.0, false)
+	require.False(t, confirmation)
+	require.Nil(t, err)
+}
+
+func TestReadBankAccount(t *testing.T) {
+	// Setup
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	smartContract := chaincode.SmartContract{} // Correct instantiation
+
+	// Test Case 1: Bank account exists
+	chaincodeStub.GetStateReturnsOnCall(0, []byte(`{"ID":"existingAccount","Currency":0,"Balance":100}`), nil) // Set state to indicate existing account with EUR currency and balance 100
+
+	_, err := smartContract.ReadBankAccount(transactionContext, "existingAccount")
+	require.NoError(t, err)
+
+	// Test Case 2: Bank account does not exist
+	chaincodeStub.GetStateReturnsOnCall(1, nil, nil) // Set state to indicate non-existing account
+
+	_, nonExistingErr := smartContract.ReadBankAccount(transactionContext, "nonExistingAccount")
+	require.Error(t, nonExistingErr)
+	require.EqualError(t, nonExistingErr, "the bank account with id nonExistingAccount does not exist")
+}
+
+func TestTransferMoney_SameCurrency(t *testing.T) {
+	// Setup
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	smartContract := chaincode.SmartContract{} // Correct instantiation
+
+	// Test Case: Same currency with confirmation
+	chaincodeStub.GetStateReturnsOnCall(0, []byte(`{"ID":"srcAccount","Currency":0,"Balance":100}`), nil) // Set state for source account with EUR currency and balance 100
+	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":0,"Balance":50}`), nil)  // Set state for destination account with EUR currency and balance 50
+	chaincodeStub.GetStateReturnsOnCall(2, nil, nil)                                                      // Set state to indicate confirmation user exists
+
+	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 75.0, true)
+	require.True(t, confirmation)
+	require.Nil(t, err)
+}
+
+func TestTransferMoney_DifferentCurrenciesWithConfirmation(t *testing.T) {
+	// Setup
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	smartContract := chaincode.SmartContract{} // Correct instantiation
+
+	// Test Case: Different currencies with confirmation
+	chaincodeStub.GetStateReturnsOnCall(0, []byte(`{"ID":"srcAccount","Currency":0,"Balance":100}`), nil) // Set state for source account with EUR currency and balance 100
+	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":1,"Balance":50}`), nil)  // Set state for destination account with RSD currency and balance 50
+	chaincodeStub.GetStateReturnsOnCall(2, nil, nil)                                                      // Set state to indicate confirmation user exists
+
+	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 75.0, true)
+	require.True(t, confirmation)
+	require.Nil(t, err)
+}

@@ -161,39 +161,55 @@ func (s *SmartContract) Exists(ctx contractapi.TransactionContextInterface, id s
 	return someJSON != nil, nil
 }
 
-func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterface, srcAccount string, dstAccount string, amount float64) error {
+func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterface, srcAccount string, dstAccount string, amount float64, confirmation bool) (bool, error) {
 	sourceAccount, err := s.ReadBankAccount(ctx, srcAccount)
 	if err != nil {
-		return err
-	}
-	if sourceAccount.Balance < amount {
-		return fmt.Errorf("account balance not sufficient for transfer")
-	}
-	destAccount, err := s.ReadBankAccount(ctx, dstAccount)
-	if err != nil {
-		return err
+		return false, err
 	}
 
-	if sourceAccount.Currency != destAccount.Currency {
+	if sourceAccount.Balance < amount {
+		return false, fmt.Errorf("not enough money")
+	}
+
+	destAccount, err := s.ReadBankAccount(ctx, dstAccount)
+	if err != nil {
+		return false, err
+	}
+
+	if sourceAccount.Currency != destAccount.Currency && !confirmation {
+		return false, nil
+	} else if sourceAccount.Currency != destAccount.Currency && confirmation {
+
+		var convertedAmount float64
+
+		switch sourceAccount.Currency {
+		case model.EUR:
+			convertedAmount = EurToDin(amount)
+		case model.RSD:
+			convertedAmount = DinToEur(amount)
+		}
+
+		sourceAccount.Balance -= amount
+		destAccount.Balance += convertedAmount
 
 	} else {
 		destAccount.Balance += amount
+		sourceAccount.Balance -= amount
 	}
-	sourceAccount.Balance -= amount
 
 	sourceAccountJSON, err := json.Marshal(sourceAccount)
 	if err != nil {
-		return err
+		return false, err
 	}
 	destAccountJSON, err := json.Marshal(destAccount)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	ctx.GetStub().PutState(sourceAccount.ID, sourceAccountJSON)
 	ctx.GetStub().PutState(destAccount.ID, destAccountJSON)
 
-	return nil
+	return true, nil
 }
 
 func (s *SmartContract) ReadBankAccount(ctx contractapi.TransactionContextInterface, id string) (*model.BankAccount, error) {
