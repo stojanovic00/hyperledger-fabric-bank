@@ -1,0 +1,97 @@
+version: '2.1'
+
+networks:
+  bank_network:
+
+services:
+
+  ca_orderer:
+    image: hyperledger/fabric-ca:latest
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-orderer
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=5000
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:15000
+    ports:
+      - 5000:5000
+      - 15000:15000
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/ordererOrg:/etc/hyperledger/fabric-ca-server
+    container_name: ca_orderer
+    networks:
+      - bank_network
+
+  ca_org1:
+    image: hyperledger/fabric-ca:latest
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-org1
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=7150
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:7199
+    ports:
+      - 7150:7150
+      - 7199:7199
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org1:/etc/hyperledger/fabric-ca-server
+    container_name: ca_org1
+    networks:
+      - bank_network
+
+  ca_org2:
+    image: hyperledger/fabric-ca:latest
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-org2
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=8150
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:8199
+    ports:
+      - 8150:8150
+      - 8199:8199
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org2:/etc/hyperledger/fabric-ca-server
+    container_name: ca_org2
+    networks:
+      - bank_network
+
+  ca_org3:
+    image: hyperledger/fabric-ca:latest
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-org3
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=9150
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:9199
+    ports:
+      - 9150:9150
+      - 9199:9199
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org3:/etc/hyperledger/fabric-ca-server
+    container_name: ca_org3
+    networks:
+      - bank_network
+
+  ca_org4:
+    image: hyperledger/fabric-ca:latest
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-org4
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=10150
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:10199
+    ports:
+      - 10150:10150
+      - 10199:10199
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org4:/etc/hyperledger/fabric-ca-server
+    container_name: ca_org4
+    networks:
+      - bank_network
+
