@@ -1,19 +1,16 @@
-// utils.go in the utils package
 package jwt
 
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-
-	"time"
+	"os"
 )
 
-var jwtSecret = []byte("your-secret-key")
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 func GenerateJWT(userId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": userId,
-		"exp":    time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	return token.SignedString(jwtSecret)

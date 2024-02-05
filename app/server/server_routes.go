@@ -17,8 +17,9 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 		c.JSON(404, gin.H{"message": "Endpoint doesn't exist"})
 	})
 
-	router.POST("/initLedger", handler.InitLedger)
 	//curl -X POST http://localhost:8080/login/someUserId
+	//curl -X POST http://localhost:8080/initLedger -H "Authorization:$token"
+	router.POST("/initLedger", handler.InitLedger)
 	router.POST("/login/:userID", handler.Login)
 
 	s.Router = router

@@ -3,14 +3,10 @@ package handler
 import (
 	jwtUtil "app/jwt"
 	"app/utils"
-	"log"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
-
-	"path/filepath"
+	"log"
 )
 
 type Handler struct {
@@ -48,49 +44,38 @@ func (h *Handler) InitLedger(ctx *gin.Context) {
 	}
 
 	userId := claims["userId"].(string)
+	userOrg := h.Users[userId]
 
-	wallet, err := gateway.NewFileSystemWallet("wallet")
+	wallet, err := utils.CreateWallet(userId, userOrg)
 	if err != nil {
-		log.Fatalf("Failed to create wallet: %v", err)
+		ctx.JSON(500, gin.H{"error": "Failed to create or populate wallet"})
+		return
 	}
 
-	if !wallet.Exists("appUser") {
-		err = utils.PopulateWallet(wallet)
-		if err != nil {
-			log.Fatalf("Failed to populate wallet contents: %v", err)
-		}
-	}
-
-	ccpPath := filepath.Join(
-		"..",
-		"..",
-		"test-network",
-		"organizations",
-		"peerOrganizations",
-		"org1.example.com",
-		"connection-org1.yaml",
-	)
-
-	gw, err := gateway.Connect(
-		gateway.WithConfig(config.FromFile(filepath.Clean(ccpPath))),
-		gateway.WithIdentity(wallet, "appUser"),
-	)
+	gw, err := utils.ConnectToGateway(wallet)
 	if err != nil {
-		log.Fatalf("Failed to connect to gateway: %v", err)
+		ctx.JSON(500, gin.H{"error": "Failed to connect to gateway"})
+		return
 	}
 	defer gw.Close()
 
 	network, err := gw.GetNetwork("mychannel")
 	if err != nil {
-		log.Fatalf("Failed to get network: %v", err)
+		ctx.JSON(500, gin.H{"error": "Failed to get network"})
+		return
 	}
 
 	contract := network.GetContract("basic")
-	println(contract)
 	log.Println("--> Submit Transaction: InitLedger, function creates the initial set of assets on the ledger")
-	// result, err := contract.SubmitTransaction("InitLedger")
-	// if err != nil {
-	// 	log.Fatalf("Failed to Submit transaction: %v", err)
-	// }
-	// log.Println(string(result))
+	result, err := h.submitTransaction(contract, "InitLedger")
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to submit transaction"})
+		return
+	}
+
+	log.Println(string(result))
+}
+
+func (h *Handler) submitTransaction(contract *gateway.Contract, transaction string) ([]byte, error) {
+	return contract.SubmitTransaction(transaction)
 }

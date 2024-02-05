@@ -9,10 +9,7 @@ require (
 	google.golang.org/grpc v1.59.0 // indirect
 )
 
-require (
-	github.com/gin-gonic/gin v1.9.1
-	github.com/jessevdk/go-flags v1.5.0
-)
+require github.com/gin-gonic/gin v1.9.1
 
 require (
 	github.com/kr/pretty v0.3.1 // indirect
@@ -24,4 +21,6 @@ require (
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/hyperledger/fabric-sdk-go v1.0.0
+	github.com/jessevdk/go-flags v1.4.0
+	github.com/joho/godotenv v1.5.1
 )
