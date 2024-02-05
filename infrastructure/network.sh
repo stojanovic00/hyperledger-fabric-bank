@@ -447,7 +447,10 @@ function createChannel() {
   # more to create the channel creation transaction and the anchor peer updates.
   # configtx.yaml is mounted in the cli container, which allows us to use it to
   # create the channel artifacts
-  scripts/createChannel.sh $CHANNEL_NAME $CLI_DELAY $MAX_RETRY $VERBOSE
+  #scripts/createChannel.sh $CHANNEL_NAME $CLI_DELAY $MAX_RETRY $VERBOSE
+
+  scripts/createChannel.sh channel1 $CLI_DELAY $MAX_RETRY $VERBOSE
+  scripts/createChannel.sh channel2  $CLI_DELAY $MAX_RETRY $VERBOSE
 }
 
 
@@ -510,11 +513,11 @@ CC_COLL_CONFIG="NA"
 # chaincode init function defaults to "NA"
 CC_INIT_FCN="NA"
 # use this as the default docker-compose yaml definition
-COMPOSE_FILE_BASE=${DOCKER_PATH}/docker-compose-test-net.yaml
+#COMPOSE_FILE_BASE=${DOCKER_PATH}/docker-compose-test-net.yaml
 # docker-compose.yaml file if you are using couchdb
-COMPOSE_FILE_COUCH=${DOCKER_PATH}/docker-compose-couch.yaml
+#COMPOSE_FILE_COUCH=${DOCKER_PATH}/docker-compose-couch.yaml
 # certificate authorities compose file
-COMPOSE_FILE_CA=${DOCKER_COMPOSE_CA_FILE_PATH}
+#COMPOSE_FILE_CA=${DOCKER_COMPOSE_CA_FILE_PATH}
 
 # chaincode language defaults to "NA"
 CC_SRC_LANGUAGE="NA"
