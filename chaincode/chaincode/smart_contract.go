@@ -160,6 +160,7 @@ func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface,
 
 	return assetJSON != nil, nil
 }
+
 func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterface, srcAccount string, dstAccount string, amount float64, confirmation bool) (bool, error) {
 	sourceAccount, err := s.ReadBankAccount(ctx, srcAccount)
 	if err != nil {
@@ -211,18 +212,38 @@ func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterfac
 	return true, nil
 }
 
+func (s *SmartContract) MoneyWithdrawal(ctx contractapi.TransactionContextInterface, acc string, amount float64) (bool, error) {
+	account, err := s.ReadBankAccount(ctx, acc)
+	fmt.Printf("MoneyWithdrawal: ReadBankAccount result - Account: %+v, Error: %+v\n", account, err)
+
+	if err != nil {
+		return false, err
+	}
+
+	if account.Balance < amount {
+		return false, fmt.Errorf("Insufficient funds")
+	}
+
+	account.Balance = account.Balance - amount
+
+	fmt.Printf("MoneyWithdrawal: Updated balance: %f\n", account.Balance)
+
+	accountJSON, err := json.Marshal(account)
+	if err != nil {
+		return false, err
+	}
+
+	ctx.GetStub().PutState(account.ID, accountJSON)
+
+	fmt.Printf("MoneyWithdrawal: ReadBankAccount result - Account: %+v, Error: %+v\n", account, err)
+	return true, nil
+}
+
 func (s *SmartContract) MoneyDepositToAccount(ctx contractapi.TransactionContextInterface, acc string, amount float64) (bool, error) {
 	account, err := s.ReadBankAccount(ctx, acc)
 	fmt.Printf("MoneyDepositToAccount: ReadBankAccount result - Account: %+v, Error: %+v\n", account, err)
 
-	switch account.Currency {
-	case model.EUR:
-		convertedAmount := EurToDin(amount)
-		account.Balance = account.Balance + convertedAmount
-	case model.RSD:
-		convertedAmount := DinToEur(amount)
-		account.Balance = account.Balance + convertedAmount
-	}
+	account.Balance = account.Balance + amount
 
 	fmt.Printf("MoneyDepositToAccount: Updated balance: %f\n", account.Balance)
 
@@ -236,7 +257,6 @@ func (s *SmartContract) MoneyDepositToAccount(ctx contractapi.TransactionContext
 	}
 
 	ctx.GetStub().PutState(account.ID, accountJSON)
-	fmt.Println("MoneyDepositToAccount: End")
 
 	return true, nil
 }
