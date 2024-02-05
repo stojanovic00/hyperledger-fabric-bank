@@ -160,7 +160,6 @@ func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface,
 
 	return assetJSON != nil, nil
 }
-
 func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterface, srcAccount string, dstAccount string, amount float64, confirmation bool) (bool, error) {
 	sourceAccount, err := s.ReadBankAccount(ctx, srcAccount)
 	if err != nil {
@@ -212,6 +211,45 @@ func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterfac
 	return true, nil
 }
 
+func (s *SmartContract) MoneyDepositToAccount(ctx contractapi.TransactionContextInterface, acc string, amount float64) (bool, error) {
+	account, err := s.ReadBankAccount(ctx, acc)
+	fmt.Printf("MoneyDepositToAccount: ReadBankAccount result - Account: %+v, Error: %+v\n", account, err)
+
+	switch account.Currency {
+	case model.EUR:
+		convertedAmount := EurToDin(amount)
+		account.Balance = account.Balance + convertedAmount
+	case model.RSD:
+		convertedAmount := DinToEur(amount)
+		account.Balance = account.Balance + convertedAmount
+	}
+
+	fmt.Printf("MoneyDepositToAccount: Updated balance: %f\n", account.Balance)
+
+	if err != nil {
+		return false, err
+	}
+
+	accountJSON, err := json.Marshal(account)
+	if err != nil {
+		return false, err
+	}
+
+	ctx.GetStub().PutState(account.ID, accountJSON)
+	fmt.Println("MoneyDepositToAccount: End")
+
+	return true, nil
+}
+
+func (s *SmartContract) Exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	someJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return false, fmt.Errorf("failed to read from world state: %v", err)
+	}
+
+	return someJSON != nil, nil
+}
+
 func (s *SmartContract) ReadBankAccount(ctx contractapi.TransactionContextInterface, id string) (*model.BankAccount, error) {
 	accJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
@@ -230,7 +268,6 @@ func (s *SmartContract) ReadBankAccount(ctx contractapi.TransactionContextInterf
 	return &bankAccount, nil
 }
 
-// TODO: automatically generate unique ID by first querying CouchDb for all users
 func (s *SmartContract) AddUser(ctx contractapi.TransactionContextInterface, id, name, surname, email string) error {
 	exists, err := s.AssetExists(ctx, id)
 	if err != nil {
