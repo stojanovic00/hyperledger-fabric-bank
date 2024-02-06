@@ -1,0 +1,7 @@
+#!/bin/bash
+
+./network.sh down
+./network.sh up
+./network.sh createChannel
+./network.sh deployCC -ccp ../chaincode/ -ccn bankchaincode1 -c channel1
+#./network.sh deployCC -ccp ../chaincode/ -ccn bankchaincode2 -c channel2
