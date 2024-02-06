@@ -8,3 +8,7 @@
 *.ipr
 *.iws
 *.idea_modules/
+
+# Go 
+chaincode/vendor/
+

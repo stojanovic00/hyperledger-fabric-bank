@@ -2,8 +2,8 @@
 
 source scripts/utils.sh
 
-CHANNEL_NAME=${1:-"pdasp"}
-CC_NAME=${2}
+CHANNEL_NAME=${1:-"channel1"}
+CC_NAME=bankchaincode
 CC_SRC_PATH=${3}
 CC_SRC_LANGUAGE=${4}
 CC_VERSION=${5:-"1.0"}
@@ -39,10 +39,6 @@ if [ -z "$CC_NAME" ] || [ "$CC_NAME" = "NA" ]; then
 elif [ -z "$CC_SRC_PATH" ] || [ "$CC_SRC_PATH" = "NA" ]; then
   fatalln "No chaincode path was provided. Valid call example: ./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-go -ccl go"
 
-# User has not provided a language
-elif [ -z "$CC_SRC_LANGUAGE" ] || [ "$CC_SRC_LANGUAGE" = "NA" ]; then
-  fatalln "No chaincode language was provided. Valid call example: ./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-go -ccl go"
-
 ## Make sure that the path to the chaincode exists
 elif [ ! -d "$CC_SRC_PATH" ]; then
   fatalln "Path to chaincode does not exist. Please provide different path."
@@ -50,43 +46,14 @@ fi
 
 CC_SRC_LANGUAGE=$(echo "$CC_SRC_LANGUAGE" | tr [:upper:] [:lower:])
 
-# do some language specific preparation to the chaincode before packaging
-if [ "$CC_SRC_LANGUAGE" = "go" ]; then
-  CC_RUNTIME_LANGUAGE=golang
+CC_RUNTIME_LANGUAGE=golang
 
-  infoln "Vendoring Go dependencies at $CC_SRC_PATH"
-  pushd $CC_SRC_PATH
-  GO111MODULE=on go mod vendor
-  popd
-  successln "Finished vendoring Go dependencies"
+infoln "Vendoring Go dependencies at $CC_SRC_PATH"
+pushd $CC_SRC_PATH
+GO111MODULE=on go mod vendor
+popd
+successln "Finished vendoring Go dependencies"
 
-elif [ "$CC_SRC_LANGUAGE" = "java" ]; then
-  CC_RUNTIME_LANGUAGE=java
-
-  infoln "Compiling Java code..."
-  pushd $CC_SRC_PATH
-  ./gradlew installDist
-  popd
-  successln "Finished compiling Java code"
-  CC_SRC_PATH=$CC_SRC_PATH/build/install/$CC_NAME
-
-elif [ "$CC_SRC_LANGUAGE" = "javascript" ]; then
-  CC_RUNTIME_LANGUAGE=node
-
-elif [ "$CC_SRC_LANGUAGE" = "typescript" ]; then
-  CC_RUNTIME_LANGUAGE=node
-
-  infoln "Compiling TypeScript code into JavaScript..."
-  pushd $CC_SRC_PATH
-  npm install
-  npm run build
-  popd
-  successln "Finished compiling TypeScript code into JavaScript"
-
-else
-  fatalln "The chaincode language ${CC_SRC_LANGUAGE} is not supported by this script. Supported chaincode languages are: go, java, javascript, and typescript"
-  exit 1
-fi
 
 INIT_REQUIRED="--init-required"
 # check if the init fcn should be called
@@ -122,28 +89,46 @@ packageChaincode() {
 # installChaincode PEER ORG
 installChaincode() {
   ORG=$1
+  PEER=$2
   setGlobals $ORG
+  # Prepare ENVs
+  export CORE_PEER_TLS_ENABLED=true
+  export CORE_PEER_LOCALMSPID="Org${ORG}MSP"
+  export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org${ORG}.example.com/peers/peer${PEER}.org${ORG}.example.com/tls/ca.crt
+  export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org${ORG}.example.com/users/Admin@org${ORG}.example.com/msp
+  export CORE_PEER_ADDRESS=localhost:$((6 + $ORG))05$PEER
+  export FABRIC_CFG_PATH=$PWD/config/
+
   set -x
   peer lifecycle chaincode install ${CC_NAME}.tar.gz >&log.txt
   res=$?
   { set +x; } 2>/dev/null
   cat log.txt
-  verifyResult $res "Chaincode installation on peer0.org${ORG} has failed"
-  successln "Chaincode is installed on peer0.org${ORG}"
+  verifyResult $res "Chaincode installation on peer${PEER}.org${ORG} has failed"
+  successln "Chaincode is installed on peer${PEER}.org${ORG}"
 }
 
 # queryInstalled PEER ORG
 queryInstalled() {
   ORG=$1
+  PEER=$2
   setGlobals $ORG
+  # Prepare ENVs
+  export CORE_PEER_TLS_ENABLED=true
+  export CORE_PEER_LOCALMSPID="Org${ORG}MSP"
+  export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org${ORG}.example.com/peers/peer${PEER}.org${ORG}.example.com/tls/ca.crt
+  export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org${ORG}.example.com/users/Admin@org${ORG}.example.com/msp
+  export CORE_PEER_ADDRESS=localhost:$((6 + $ORG))05$PEER
+  export FABRIC_CFG_PATH=$PWD/config/
+
   set -x
   peer lifecycle chaincode queryinstalled >&log.txt
   res=$?
   { set +x; } 2>/dev/null
   cat log.txt
   PACKAGE_ID=$(sed -n "/${CC_NAME}_${CC_VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" log.txt)
-  verifyResult $res "Query installed on peer0.org${ORG} has failed"
-  successln "Query installed successful on peer0.org${ORG} on channel"
+  verifyResult $res "Query installed on peer${PEER}.org${ORG} has failed"
+  successln "Query installed successful on peer${PEER}.org${ORG} on channel"
 }
 
 # approveForMyOrg VERSION PEER ORG
@@ -288,19 +273,33 @@ packageChaincode
 ## Install chaincode on peer0.org1 and peer0.org2
 for ((i = 1; i <= $ORGANIZATION_NUMBER; i++))
 do
-  infoln "Installing chaincode on peer0.org$i..."
-  installChaincode $i
+  for ((j = 0; j < $PEER_PER_ORGANIZATION_NUMBER; j++))
+  do
+    infoln "Installing chaincode on peer$j.org$i..."
+    installChaincode $i $j
+  done
 done
 
 ## query whether the chaincode is installed
 ## approve the definition for org1
+#orgs=""
+for ((i = 1; i <= $ORGANIZATION_NUMBER; i++))
+do
+  for ((j = 0; j < $PEER_PER_ORGANIZATION_NUMBER; j++))
+  do
+    queryInstalled $i $j
+    #orgs="$orgs $i"
+    #approveForMyOrg $i
+  done
+done
+
 orgs=""
 for ((i = 1; i <= $ORGANIZATION_NUMBER; i++))
 do
-  queryInstalled $i
   orgs="$orgs $i"
   approveForMyOrg $i
 done
+
 
 ## now that we know for sure both orgs have approved, commit the definition
 commitChaincodeDefinition $orgs
