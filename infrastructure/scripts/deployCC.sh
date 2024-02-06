@@ -3,7 +3,7 @@
 source scripts/utils.sh
 
 CHANNEL_NAME=${1:-"channel1"}
-CC_NAME=bankchaincode
+CC_NAME=${2:-"bankchaincode1"}
 CC_SRC_PATH=${3}
 CC_SRC_LANGUAGE=${4}
 CC_VERSION=${5:-"1.0"}
@@ -19,7 +19,6 @@ println "executing with the following"
 println "- CHANNEL_NAME: ${C_GREEN}${CHANNEL_NAME}${C_RESET}"
 println "- CC_NAME: ${C_GREEN}${CC_NAME}${C_RESET}"
 println "- CC_SRC_PATH: ${C_GREEN}${CC_SRC_PATH}${C_RESET}"
-println "- CC_SRC_LANGUAGE: ${C_GREEN}${CC_SRC_LANGUAGE}${C_RESET}"
 println "- CC_VERSION: ${C_GREEN}${CC_VERSION}${C_RESET}"
 println "- CC_SEQUENCE: ${C_GREEN}${CC_SEQUENCE}${C_RESET}"
 println "- CC_END_POLICY: ${C_GREEN}${CC_END_POLICY}${C_RESET}"
