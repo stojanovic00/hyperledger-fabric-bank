@@ -187,7 +187,7 @@ networks:
 services:
 
   ca_orderer:
-    image: hyperledger/fabric-ca:latest
+    image: hyperledger/fabric-ca:1.5.7
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-orderer
@@ -208,7 +208,7 @@ services:
     for (( i = 1; i<= $ORGANIZATION_NUMBER; i++))
     do
       echo "  ca_org$i:
-    image: hyperledger/fabric-ca:latest
+    image: hyperledger/fabric-ca:1.5.7
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org$i
@@ -247,7 +247,7 @@ services:
 
   orderer.example.com:
     container_name: orderer.example.com
-    image: hyperledger/fabric-orderer:latest
+    image: hyperledger/fabric-orderer:2.2.6
     environment:
       - FABRIC_LOGGING_SPEC=INFO
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
@@ -285,7 +285,7 @@ services:
         for ((j = 0; j < $PEER_PER_ORGANIZATION_NUMBER; ++j)) do
           echo "  peer$j.org$i.example.com:
     container_name: peer$j.org$i.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -327,7 +327,7 @@ services:
 
   couchdb$i$j:
     container_name: couchdb$i$j
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -339,7 +339,7 @@ services:
 
       echo "  cli:
     container_name: cli
-    image: hyperledger/fabric-tools:latest
+    image: hyperledger/fabric-tools:2.2.6
     tty: true
     stdin_open: true
     environment:
@@ -526,9 +526,9 @@ CC_VERSION="1.0"
 # Chaincode definition sequence
 CC_SEQUENCE=1
 # default image tag
-IMAGETAG="latest"
+IMAGETAG="2.2.6"
 # default ca image tag
-CA_IMAGETAG="latest"
+CA_IMAGETAG="1.5.7"
 # default database
 DATABASE="couchdb"
 

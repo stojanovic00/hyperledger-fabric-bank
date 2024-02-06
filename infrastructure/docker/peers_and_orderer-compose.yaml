@@ -30,7 +30,7 @@ services:
 
   orderer.example.com:
     container_name: orderer.example.com
-    image: hyperledger/fabric-orderer:latest
+    image: hyperledger/fabric-orderer:2.2.6
     environment:
       - FABRIC_LOGGING_SPEC=INFO
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
@@ -65,7 +65,7 @@ services:
 
   peer0.org1.example.com:
     container_name: peer0.org1.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -107,7 +107,7 @@ services:
 
   couchdb10:
     container_name: couchdb10
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -116,7 +116,7 @@ services:
 
   peer1.org1.example.com:
     container_name: peer1.org1.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -158,7 +158,7 @@ services:
 
   couchdb11:
     container_name: couchdb11
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -167,7 +167,7 @@ services:
 
   peer2.org1.example.com:
     container_name: peer2.org1.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -209,7 +209,7 @@ services:
 
   couchdb12:
     container_name: couchdb12
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -218,7 +218,7 @@ services:
 
   peer3.org1.example.com:
     container_name: peer3.org1.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -260,7 +260,7 @@ services:
 
   couchdb13:
     container_name: couchdb13
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -269,7 +269,7 @@ services:
 
   peer0.org2.example.com:
     container_name: peer0.org2.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -311,7 +311,7 @@ services:
 
   couchdb20:
     container_name: couchdb20
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -320,7 +320,7 @@ services:
 
   peer1.org2.example.com:
     container_name: peer1.org2.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -362,7 +362,7 @@ services:
 
   couchdb21:
     container_name: couchdb21
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -371,7 +371,7 @@ services:
 
   peer2.org2.example.com:
     container_name: peer2.org2.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -413,7 +413,7 @@ services:
 
   couchdb22:
     container_name: couchdb22
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -422,7 +422,7 @@ services:
 
   peer3.org2.example.com:
     container_name: peer3.org2.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -464,7 +464,7 @@ services:
 
   couchdb23:
     container_name: couchdb23
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -473,7 +473,7 @@ services:
 
   peer0.org3.example.com:
     container_name: peer0.org3.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -515,7 +515,7 @@ services:
 
   couchdb30:
     container_name: couchdb30
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -524,7 +524,7 @@ services:
 
   peer1.org3.example.com:
     container_name: peer1.org3.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -566,7 +566,7 @@ services:
 
   couchdb31:
     container_name: couchdb31
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -575,7 +575,7 @@ services:
 
   peer2.org3.example.com:
     container_name: peer2.org3.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -617,7 +617,7 @@ services:
 
   couchdb32:
     container_name: couchdb32
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -626,7 +626,7 @@ services:
 
   peer3.org3.example.com:
     container_name: peer3.org3.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -668,7 +668,7 @@ services:
 
   couchdb33:
     container_name: couchdb33
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -677,7 +677,7 @@ services:
 
   peer0.org4.example.com:
     container_name: peer0.org4.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -719,7 +719,7 @@ services:
 
   couchdb40:
     container_name: couchdb40
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -728,7 +728,7 @@ services:
 
   peer1.org4.example.com:
     container_name: peer1.org4.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -770,7 +770,7 @@ services:
 
   couchdb41:
     container_name: couchdb41
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -779,7 +779,7 @@ services:
 
   peer2.org4.example.com:
     container_name: peer2.org4.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -821,7 +821,7 @@ services:
 
   couchdb42:
     container_name: couchdb42
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -830,7 +830,7 @@ services:
 
   peer3.org4.example.com:
     container_name: peer3.org4.example.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.2.6
     environment:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -872,7 +872,7 @@ services:
 
   couchdb43:
     container_name: couchdb43
-    image: couchdb:3.1.1
+    image: couchdb:latest
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
@@ -881,7 +881,7 @@ services:
 
   cli:
     container_name: cli
-    image: hyperledger/fabric-tools:latest
+    image: hyperledger/fabric-tools:2.2.6
     tty: true
     stdin_open: true
     environment:

@@ -6,7 +6,7 @@ networks:
 services:
 
   ca_orderer:
-    image: hyperledger/fabric-ca:latest
+    image: hyperledger/fabric-ca:1.5.7
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-orderer
@@ -24,7 +24,7 @@ services:
       - bank_network
 
   ca_org1:
-    image: hyperledger/fabric-ca:latest
+    image: hyperledger/fabric-ca:1.5.7
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org1
@@ -42,7 +42,7 @@ services:
       - bank_network
 
   ca_org2:
-    image: hyperledger/fabric-ca:latest
+    image: hyperledger/fabric-ca:1.5.7
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org2
@@ -60,7 +60,7 @@ services:
       - bank_network
 
   ca_org3:
-    image: hyperledger/fabric-ca:latest
+    image: hyperledger/fabric-ca:1.5.7
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org3
@@ -78,7 +78,7 @@ services:
       - bank_network
 
   ca_org4:
-    image: hyperledger/fabric-ca:latest
+    image: hyperledger/fabric-ca:1.5.7
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org4
