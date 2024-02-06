@@ -501,7 +501,7 @@ MAX_RETRY=5
 # default for delay between commands
 CLI_DELAY=3
 # channel name defaults to "mychannel"
-CHANNEL_NAME="pdasp"
+CHANNEL_NAME="channel1"
 # chaincode name defaults to "NA"
 CC_NAME="NA"
 # chaincode path defaults to "NA"
