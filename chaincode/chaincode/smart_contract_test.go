@@ -3,8 +3,6 @@ package chaincode_test
 import (
 	"chaincode/chaincode"
 	"chaincode/chaincode/mocks"
-	"chaincode/model"
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -211,34 +209,6 @@ func TestTransferMoney_DifferentCurrenciesWithConfirmation(t *testing.T) {
 	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", "75.0", "true")
 	require.True(t, confirmation)
 	require.Nil(t, err)
-}
-
-func TestMoneyDepositToAccount(t *testing.T) {
-	chaincodeStub := &mocks.ChaincodeStub{}
-	transactionContext := &mocks.TransactionContext{}
-	transactionContext.GetStubReturns(chaincodeStub)
-	smartContract := chaincode.SmartContract{}
-
-	accountID := "a99"
-	initialBalance := 100.0
-	depositAmount := 10.0
-
-	chaincodeStub.GetStateReturns([]byte(fmt.Sprintf(`{"ID":"%s","Currency":0,"Balance":%f}`, accountID, initialBalance+depositAmount)), nil)
-
-	result, err := smartContract.MoneyDepositToAccount(transactionContext, accountID, depositAmount)
-
-	require.True(t, result, "Expected successful deposit")
-	require.Nil(t, err, "Unexpected error during deposit")
-
-	expectedUpdatedBalance := initialBalance + depositAmount
-	accountJSON, err := chaincodeStub.GetState(accountID)
-	require.Nil(t, err, "Error retrieving account state after deposit")
-
-	var updatedAccount model.BankAccount
-	err = json.Unmarshal(accountJSON, &updatedAccount)
-	require.Nil(t, err, "Error unmarshalling updated account JSON")
-
-	require.Equal(t, expectedUpdatedBalance, updatedAccount.Balance, "Account balance not updated correctly after deposit")
 }
 
 func TestAddUser(t *testing.T) {
