@@ -25,6 +25,7 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 	//curl -X POST http://localhost:8080/login/someUserId
 	//Unauthorized
 	router.POST("/login/:userID", handler.Login)
+	router.POST("/add-user/:channel", handler.AddUser)
 
 	//Authorized
 	//curl -X POST http://localhost:8080/init-ledger -H "Authorization:$token"
