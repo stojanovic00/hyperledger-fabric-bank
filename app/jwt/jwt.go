@@ -8,9 +8,10 @@ import (
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
-func GenerateJWT(userId string) (string, error) {
+func GenerateJWT(userId, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": userId,
+		"role":   role,
 	})
 
 	return token.SignedString(jwtSecret)

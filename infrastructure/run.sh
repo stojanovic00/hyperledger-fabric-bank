@@ -5,3 +5,7 @@
 ./network.sh createChannel
 ./network.sh deployCC -ccp ../chaincode/ -ccn bankchaincode1 -c channel1
 #./network.sh deployCC -ccp ../chaincode/ -ccn bankchaincode2 -c channel2
+
+# Init ledger
+cd utils
+./init_ledger.sh

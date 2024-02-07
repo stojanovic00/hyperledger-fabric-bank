@@ -3,6 +3,7 @@ package server
 import (
 	"app/handler"
 	"app/jwt"
+	"app/model"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,31 +26,37 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 	//curl -X POST http://localhost:8080/login/someUserId
 	//Unauthorized
 	router.POST("/login/:userID", handler.Login)
-	router.POST("/add-user/:channel", handler.AddUser)
 
 	//Authorized
 	//curl -X POST http://localhost:8080/init-ledger -H "Authorization:$token"
-	router.Use(jwt.AuthMiddleware())
-	router.POST("/init-ledger/:channel", handler.InitLedger)
+	router.Use(jwt.AuthenticationMiddleware())
+	//Ledger initialization moved to run.sh
+	//router.POST("/init-ledger/:channel", jwt.AuthorizationMiddleware("ADMIN"), handler.InitLedger)
+	router.POST("/add-user/:channel", jwt.AuthorizationMiddleware("ADMIN"), handler.AddUser)
 
 	s.Router = router
 	return nil
 }
 
-func (s *Server) SetupUsers() map[string]string {
-	users := map[string]string{
-		"u1":  "org1",
-		"u2":  "org2",
-		"u3":  "org3",
-		"u4":  "org4",
-		"u5":  "org1",
-		"u6":  "org2",
-		"u7":  "org3",
-		"u8":  "org4",
-		"u9":  "org2",
-		"u10": "org2",
-		"u11": "org2",
-		"u12": "org2",
+func (s *Server) SetupUsers() map[string]model.UserInfo {
+	users := map[string]model.UserInfo{
+		"u1":  {UserId: "u1", Organization: "org1", Admin: false},
+		"u2":  {UserId: "u2", Organization: "org2", Admin: false},
+		"u3":  {UserId: "u3", Organization: "org3", Admin: false},
+		"u4":  {UserId: "u4", Organization: "org4", Admin: false},
+		"u5":  {UserId: "u5", Organization: "org1", Admin: false},
+		"u6":  {UserId: "u6", Organization: "org2", Admin: false},
+		"u7":  {UserId: "u7", Organization: "org3", Admin: false},
+		"u8":  {UserId: "u8", Organization: "org4", Admin: false},
+		"u9":  {UserId: "u9", Organization: "org1", Admin: false},
+		"u10": {UserId: "u10", Organization: "org2", Admin: false},
+		"u11": {UserId: "u11", Organization: "org3", Admin: false},
+		"u12": {UserId: "u12", Organization: "org4", Admin: false},
+		//Admins
+		"s1": {UserId: "s1", Organization: "org1", Admin: true},
+		"s2": {UserId: "s2", Organization: "org2", Admin: true},
+		"s3": {UserId: "s3", Organization: "org3", Admin: true},
+		"s4": {UserId: "s4", Organization: "org4", Admin: true},
 	}
 	return users
 }

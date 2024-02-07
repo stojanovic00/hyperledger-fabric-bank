@@ -3,9 +3,10 @@ package jwt
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthenticationMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := ExtractAndValidateToken(ctx)
 		if err != nil {
@@ -23,8 +24,28 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// Set the claims for further usage
 		ctx.Set("userId", claims["userId"].(string))
+		ctx.Set("role", claims["role"].(string))
 
 		// Continue to the next middleware or handler
+		ctx.Next()
+	}
+}
+
+func AuthorizationMiddleware(requiredRole string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		providedRoleEntry, ok := ctx.Get("role")
+		if !ok {
+			ctx.JSON(400, gin.H{"error": "no auth parameters provided"})
+			return
+		}
+		providedRole := providedRoleEntry.(string)
+
+		if providedRole != requiredRole {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "you are not authorized for this action"})
+			ctx.Abort()
+			return
+		}
+
 		ctx.Next()
 	}
 }
