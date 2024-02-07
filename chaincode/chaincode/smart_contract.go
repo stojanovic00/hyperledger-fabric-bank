@@ -227,8 +227,14 @@ func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterfac
 	return true, nil
 }
 
-func (s *SmartContract) MoneyWithdrawal(ctx contractapi.TransactionContextInterface, acc string, amount float64) (bool, error) {
-	account, err := s.ReadBankAccount(ctx, acc)
+func (s *SmartContract) MoneyWithdrawal(ctx contractapi.TransactionContextInterface, usrID string, amount float64) (bool, error) {
+	println("------------")
+	bankAccount, err := s.GetBankAccountByUser(ctx, usrID)
+	if err != nil {
+		return false, err
+	}
+
+	account, err := s.ReadBankAccount(ctx, bankAccount.ID)
 	fmt.Printf("MoneyWithdrawal: ReadBankAccount result - Account: %+v, Error: %+v\n", account, err)
 
 	if err != nil {
@@ -238,6 +244,7 @@ func (s *SmartContract) MoneyWithdrawal(ctx contractapi.TransactionContextInterf
 	if account.Balance < amount {
 		return false, fmt.Errorf("Insufficient funds")
 	}
+	println("------------")
 
 	account.Balance = account.Balance - amount
 
@@ -455,4 +462,34 @@ func (s *SmartContract) GetUsersBySurnameAndEmail(ctx contractapi.TransactionCon
 	}
 
 	return users, nil
+}
+
+func (s *SmartContract) GetBankAccountByUser(ctx contractapi.TransactionContextInterface, usrId string) (*model.BankAccount, error) {
+	queryString := fmt.Sprintf(`{
+		"selector": {
+			"user_id": "%s"
+		}
+	}`, usrId)
+
+	queryResults, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %v", err)
+	}
+	defer queryResults.Close()
+
+	if !queryResults.HasNext() {
+		return nil, fmt.Errorf("bank account with ID %s not found", usrId)
+	}
+
+	queryResult, err := queryResults.Next()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get query result: %v", err)
+	}
+
+	var bankAccount model.BankAccount
+	if err := json.Unmarshal(queryResult.Value, &bankAccount); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal bank account: %v", err)
+	}
+
+	return &bankAccount, nil
 }

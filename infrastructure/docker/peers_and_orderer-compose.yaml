@@ -41,9 +41,9 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
         - orderer.example.com:/var/hyperledger/production/orderer
     ports:
       - 7000:7000
@@ -80,8 +80,8 @@ services:
       - CORE_OPERATIONS_LISTENADDRESS=peer0.org1.example.com:9910
     volumes:
         - /var/run/docker.sock:/host/var/run/docker.sock
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.org1.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
@@ -131,8 +131,8 @@ services:
       - CORE_OPERATIONS_LISTENADDRESS=peer0.org2.example.com:9920
     volumes:
         - /var/run/docker.sock:/host/var/run/docker.sock
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.org2.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
@@ -182,8 +182,8 @@ services:
       - CORE_OPERATIONS_LISTENADDRESS=peer0.org3.example.com:9930
     volumes:
         - /var/run/docker.sock:/host/var/run/docker.sock
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.org3.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
@@ -233,8 +233,8 @@ services:
       - CORE_OPERATIONS_LISTENADDRESS=peer0.org4.example.com:9940
     volumes:
         - /var/run/docker.sock:/host/var/run/docker.sock
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/msp:/etc/hyperledger/fabric/msp
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls:/etc/hyperledger/fabric/tls
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/msp:/etc/hyperledger/fabric/msp
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.org4.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
@@ -269,8 +269,8 @@ services:
     command: /bin/bash
     volumes:
         - /var/run/:/host/var/run/
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
-        - /home/filip/Desktop/PIDASP-Projekat/hyperledger-fabric-bank/infrastructure/scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
+        - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
     networks:
       - bank_network
     depends_on:
