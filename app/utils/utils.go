@@ -11,10 +11,9 @@ import (
 )
 
 func PopulateWallet(wallet *gateway.Wallet, org string) error {
-	log.Println("============ Populating wallet ============")
 	orgPath := fmt.Sprintf("%s.example.com", org)
 	usrPath := fmt.Sprintf("User1@%s.example.com", org)
-	orgMSP := strings.ToUpper(org[:1]) + org[1:]
+	orgMSP := strings.ToUpper(org[:1]) + org[1:] + "MSP"
 
 	credPath := filepath.Join(
 		"..",
@@ -49,7 +48,7 @@ func PopulateWallet(wallet *gateway.Wallet, org string) error {
 		return err
 	}
 
-	identity := gateway.NewX509Identity(fmt.Sprintf("%sMSP", orgMSP), string(cert), string(key))
+	identity := gateway.NewX509Identity(orgMSP, string(cert), string(key))
 
 	return wallet.Put("usr1", identity)
 }

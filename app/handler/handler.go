@@ -6,10 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"log"
+	"net/http"
 )
 
 type Handler struct {
-	Users map[string]string
+	Users      map[string]string
+	ChainCodes map[string]string
 }
 
 func (h *Handler) Login(ctx *gin.Context) {
@@ -37,8 +39,15 @@ func (h *Handler) InitLedger(ctx *gin.Context) {
 	userId := userIdEntry.(string)
 
 	userOrg := h.Users[userId]
-	channel := "channel1"
-	chaincodeId := "bankchaincode1"
+
+	channel := ctx.Param("channel")
+	if channel == "" {
+		ctx.JSON(400, gin.H{"error": "channel is required"})
+		return
+	}
+
+	chaincodeId := h.ChainCodes[channel]
+
 	wallet, err := utils.CreateWallet(userId, userOrg)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to create or populate wallet"})
@@ -59,14 +68,14 @@ func (h *Handler) InitLedger(ctx *gin.Context) {
 	}
 
 	contract := network.GetContract(chaincodeId)
-	log.Println("--> Submit Transaction: InitLedger, function creates the initial set of assets on the ledger")
-	result, err := h.submitTransaction(contract, "InitLedger")
+	log.Println("Submit Transaction: InitLedger")
+	_, err = h.submitTransaction(contract, "InitLedger")
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to submit transaction"})
 		return
 	}
 
-	log.Println(string(result))
+	ctx.JSON(http.StatusOK, gin.H{"message": "ledger initialized"})
 }
 
 func (h *Handler) submitTransaction(contract *gateway.Contract, transaction string) ([]byte, error) {
