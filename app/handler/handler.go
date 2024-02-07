@@ -5,16 +5,21 @@ import (
 	jwtUtil "app/jwt"
 	"app/model"
 	"app/utils"
-	"github.com/gin-gonic/gin"
-	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 )
 
 type Handler struct {
 	Users      map[string]model.UserInfo
 	ChainCodes map[string]string
 }
+
+type Currency int
 
 func (h *Handler) Login(ctx *gin.Context) {
 	userID := ctx.Param("userID")
@@ -156,4 +161,122 @@ func (h *Handler) AddUser(ctx *gin.Context) {
 	h.Users[user.Id] = newUserInfo
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "added user"})
+}
+
+func (h *Handler) CreateBankAccount(ctx *gin.Context) {
+	var bankAccount struct {
+		Id       string   `json:"id"`
+		Currency string   `json:"currency"`
+		Cards    []string `json:"cards"`
+		BankId   string   `json:"bankId"`
+		UserID   string   `json:"userID"`
+	}
+
+	if err := ctx.ShouldBindJSON(&bankAccount); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "couldn't resolve body"})
+		return
+	}
+
+	channel := ctx.Param("channel")
+	if channel == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "channel is required"})
+		return
+	}
+	chaincodeId := h.ChainCodes[channel]
+
+	userId := bankAccount.UserID
+	userInfo := h.Users[userId]
+
+	wallet, err := utils.CreateWallet(userId, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or populate wallet"})
+		return
+	}
+
+	gw, err := utils.ConnectToGateway(wallet, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to gateway"})
+		return
+	}
+	defer gw.Close()
+
+	network, err := gw.GetNetwork(channel)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get network"})
+		return
+	}
+
+	contract := network.GetContract(chaincodeId)
+	log.Println("Submit Transaction: CreateBankAccount")
+	_, err = contract.SubmitTransaction("CreateBankAccount", bankAccount.Id, bankAccount.Currency, strings.Join(bankAccount.Cards, ","), bankAccount.BankId, bankAccount.UserID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "bank account created"})
+}
+
+func (h *Handler) TransferMoney(ctx *gin.Context) {
+	var transfer struct {
+		SrcAccount      string `json:"srcAccount"`
+		DstAccount      string `json:"dstAccount"`
+		AmountStr       string `json:"amountStr"`
+		ConfirmationStr string `json:"confirmationStr"`
+	}
+
+	if err := ctx.ShouldBindJSON(&transfer); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "couldn't resolve body"})
+		return
+	}
+
+	channel := ctx.Param("channel")
+	if channel == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "channel is required"})
+		return
+	}
+	chaincodeID := h.ChainCodes[channel]
+
+	userIdContext, _ := ctx.Get("userId")
+	userId := fmt.Sprintf("%v", userIdContext)
+
+	userInfo := h.Users[userId]
+
+	wallet, err := utils.CreateWallet(userId, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or populate wallet"})
+		return
+	}
+
+	gw, err := utils.ConnectToGateway(wallet, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to gateway"})
+		return
+	}
+	defer gw.Close()
+
+	network, err := gw.GetNetwork(channel)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get network"})
+		return
+	}
+
+	contract := network.GetContract(chaincodeID)
+	log.Println("Submit Transaction: TransferMoney")
+	response, err := contract.SubmitTransaction("TransferMoney", transfer.SrcAccount, transfer.DstAccount, transfer.AmountStr, transfer.ConfirmationStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	responseStr := string(response)
+	var resultMsg string
+	if responseStr == "true" {
+		resultMsg = "I received true"
+	} else {
+		resultMsg = "I received false"
+	}
+	log.Println(resultMsg)
+
+	ctx.JSON(http.StatusOK, gin.H{"message": resultMsg})
 }
