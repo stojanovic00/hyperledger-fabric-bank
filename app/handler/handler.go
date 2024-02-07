@@ -5,6 +5,7 @@ import (
 	jwtUtil "app/jwt"
 	"app/model"
 	"app/utils"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -303,14 +304,15 @@ func (h *Handler) Query(ctx *gin.Context) {
 
 	chaincodeID := h.ChainCodes[channel]
 
-	userID := ctx.Get("userId")
+	userIDEntry, _ := ctx.Get("userId")
+	userID := userIDEntry.(string)
+
 	userInfo := h.Users[userID]
 	wallet, err := utils.CreateWallet(userID, userInfo.Organization)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create or populate wallet"})
 		return
 	}
-	defer wallet.Close()
 
 	gw, err := utils.ConnectToGateway(wallet, userInfo.Organization)
 	if err != nil {
@@ -327,7 +329,7 @@ func (h *Handler) Query(ctx *gin.Context) {
 
 	contract := network.GetContract(chaincodeID)
 
-	var result interface{}
+	var result []byte
 	switch by {
 	case "name":
 		result, err = contract.EvaluateTransaction("GetUsersByName", param1)
@@ -343,10 +345,32 @@ func (h *Handler) Query(ctx *gin.Context) {
 		return
 	}
 
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	if by == "account" {
+		var user model.User
+		if err := json.Unmarshal(result, &user); err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{"user": user})
+	} else {
+		var users []model.User
+		if err := json.Unmarshal(result, &users); err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{"users": users})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": result})
 }
