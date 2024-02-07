@@ -34,6 +34,27 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 	//router.POST("/init-ledger/:channel", jwt.AuthorizationMiddleware("ADMIN"), handler.InitLedger)
 	router.POST("/add-user/:channel", jwt.AuthorizationMiddleware("ADMIN"), handler.AddUser)
 
+	/*
+		curl -X POST http://localhost:8080/ \
+		-H "Authorization: $token" \
+		-d '{"id": "a123", "currency": 0,
+		"cards": ["Visa"], "bankId": "b1", "userID": "u1"}'
+	*/
+	router.POST("/create-bank-account/:channel", jwt.AuthorizationMiddleware("USER"), handler.CreateBankAccount)
+
+	/*
+			curl -X POST http://localhost:8080/transfer-money/channel1 \
+		    -H "Authorization: Bearer <your-token>" \
+		    -H "Content-Type: application/json" \
+		    -d '{
+		        "srcAccount": "",
+		        "dstAccount": "",
+		        "amountStr": "100.50",
+		        "confirmationStr": "true"
+		    }'
+	*/
+	router.POST("/transfer-money/:channel", jwt.AuthorizationMiddleware("USER"), handler.TransferMoney)
+
 	s.Router = router
 	return nil
 }

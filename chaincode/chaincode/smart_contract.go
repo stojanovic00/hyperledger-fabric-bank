@@ -4,6 +4,8 @@ import (
 	"chaincode/model"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -95,7 +97,8 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 	return nil
 }
 
-func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInterface, id string, currency model.Currency, cards []string, bankId string, userID string) error {
+func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInterface, id string, currency string, cards string, bankId string, userID string) error {
+
 	accountExists, err := s.AssetExists(ctx, id)
 	if err != nil {
 		return err
@@ -117,11 +120,13 @@ func (s *SmartContract) CreateBankAccount(ctx contractapi.TransactionContextInte
 		return err
 	}
 
+	currency_converted, _ := StringToCurrency(currency)
+
 	bankAccount := model.BankAccount{
 		ID:       id,
-		Currency: currency,
+		Currency: currency_converted,
 		Balance:  0.0,
-		Cards:    cards,
+		Cards:    strings.Split(cards, ","),
 		Bank:     *bank,
 		UserID:   userID,
 	}
@@ -161,10 +166,20 @@ func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface,
 	return assetJSON != nil, nil
 }
 
-func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterface, srcAccount string, dstAccount string, amount float64, confirmation bool) (bool, error) {
+func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterface, srcAccount string, dstAccount string, amountStr string, confirmationStr string) (bool, error) {
 	sourceAccount, err := s.ReadBankAccount(ctx, srcAccount)
 	if err != nil {
 		return false, err
+	}
+
+	amount, err := strconv.ParseFloat(amountStr, 64)
+	if err != nil {
+		return false, fmt.Errorf("failed to convert amount to float64: %v", err)
+	}
+
+	confirmation, err := strconv.ParseBool(confirmationStr)
+	if err != nil {
+		return false, fmt.Errorf("failed to convert confirmation to boolean: %v", err)
 	}
 
 	if sourceAccount.Balance < amount {
@@ -308,4 +323,15 @@ func (s *SmartContract) AddUser(ctx contractapi.TransactionContextInterface, id,
 	}
 
 	return ctx.GetStub().PutState(id, userJson)
+}
+
+func StringToCurrency(currencyStr string) (model.Currency, error) {
+	switch currencyStr {
+	case "EUR":
+		return model.EUR, nil
+	case "RSD":
+		return model.RSD, nil
+	default:
+		return 0, fmt.Errorf("invalid currency string: %s", currencyStr)
+	}
 }

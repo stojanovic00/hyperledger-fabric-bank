@@ -60,7 +60,7 @@ func TestCreateBankAccount_BankAccountDoesNotExist(t *testing.T) {
 	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"someUserData":"value"}`), nil)                                                                   // Set state to indicate user exists
 	chaincodeStub.GetStateReturnsOnCall(2, []byte(`{"ID":"b1","Name":"UniCredit","Headquarters":"Linz, Austria","Since":1969,"PIB":138429230}`), nil) // Set state to indicate bank exists
 
-	err := smartContract.CreateBankAccount(transactionContext, "a1", model.EUR, []string{"Visa"}, "b1", "u1")
+	err := smartContract.CreateBankAccount(transactionContext, "a1", "EUR", "Visa", "b1", "u1")
 	require.NoError(t, err)
 }
 
@@ -73,7 +73,7 @@ func TestCreateBankAccount_BankAccountAlreadyExists(t *testing.T) {
 
 	// Test Case: Bank account already exists
 	chaincodeStub.GetStateReturns([]byte(`{"ID":"a1","Currency":"EUR","Balance":0.0,"Cards":["Visa"],"Bank":{"ID":"b1","Name":"UniCredit","Headquarters":"Linz, Austria","Since":1969,"PIB":138429230},"UserID":"u1"}`), nil)
-	err := smartContract.CreateBankAccount(transactionContext, "a1", model.EUR, []string{"Visa"}, "b1", "u1")
+	err := smartContract.CreateBankAccount(transactionContext, "a1", "EUR", "Visa", "b1", "u1")
 	require.EqualError(t, err, "the bank account with id a1 already exists")
 }
 
@@ -88,7 +88,7 @@ func TestCreateBankAccount_UserDoesNotExist(t *testing.T) {
 	chaincodeStub.GetStateReturnsOnCall(0, nil, nil) // Set state to indicate user doesn't exist
 	chaincodeStub.GetStateReturnsOnCall(1, nil, nil) // Set state to indicate bank account doesn't exist
 
-	err := smartContract.CreateBankAccount(transactionContext, "a2", model.RSD, []string{"MasterCard"}, "b1", "u2")
+	err := smartContract.CreateBankAccount(transactionContext, "a2", "RSD", "MasterCard", "b1", "u2")
 	require.EqualError(t, err, "no registered user with id u2")
 }
 
@@ -104,7 +104,7 @@ func TestCreateBankAccount_BankDoesNotExist(t *testing.T) {
 	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"someUserData":"value"}`), nil) // Set state to indicate user exists
 	chaincodeStub.GetStateReturnsOnCall(2, nil, nil)                                // Set state to indicate no banks exist
 
-	err := smartContract.CreateBankAccount(transactionContext, "a3", model.RSD, []string{"American Express"}, "b2", "u3")
+	err := smartContract.CreateBankAccount(transactionContext, "a3", "RSD", "American Express", "b2", "u3")
 	require.EqualError(t, err, "the bank with id b2 does not exist")
 }
 
@@ -120,7 +120,7 @@ func TestTransferMoney_EnoughMoney(t *testing.T) {
 	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":0,"Balance":0}`), nil)   // Set state to indicate destination account exists with EUR currency and balance 0
 	chaincodeStub.GetStateReturnsOnCall(2, nil, nil)                                                      // Set state to indicate confirmation user exists
 
-	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 75.0, false)
+	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", "75.0", "false")
 	require.True(t, confirmation)
 	require.Nil(t, err)
 }
@@ -137,7 +137,7 @@ func TestTransferMoney_NotEnoughMoney(t *testing.T) {
 	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":0,"Balance":0}`), nil)  // Set state to indicate destination account exists with EUR currency and balance 0
 	chaincodeStub.GetStateReturnsOnCall(2, nil, nil)                                                     // Set state to indicate confirmation user exists
 
-	_, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 100.0, false)
+	_, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", "100.0", "false")
 	require.EqualError(t, err, "not enough money")
 }
 
@@ -153,7 +153,7 @@ func TestTransferMoney_DifferentCurrenciesWithoutConfirmation(t *testing.T) {
 	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":1,"Balance":0}`), nil)   // Set state to indicate destination account exists
 	chaincodeStub.GetStateReturnsOnCall(2, []byte(`{"someUserData":"value"}`), nil)                       // Set state to indicate confirmation user exists
 
-	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 50.0, false)
+	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", "50.0", "false")
 	require.False(t, confirmation)
 	require.Nil(t, err)
 }
@@ -191,7 +191,7 @@ func TestTransferMoney_SameCurrency(t *testing.T) {
 	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":0,"Balance":50}`), nil)  // Set state for destination account with EUR currency and balance 50
 	chaincodeStub.GetStateReturnsOnCall(2, nil, nil)                                                      // Set state to indicate confirmation user exists
 
-	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 75.0, true)
+	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", "75.0", "true")
 	require.True(t, confirmation)
 	require.Nil(t, err)
 }
@@ -208,7 +208,7 @@ func TestTransferMoney_DifferentCurrenciesWithConfirmation(t *testing.T) {
 	chaincodeStub.GetStateReturnsOnCall(1, []byte(`{"ID":"dstAccount","Currency":1,"Balance":50}`), nil)  // Set state for destination account with RSD currency and balance 50
 	chaincodeStub.GetStateReturnsOnCall(2, nil, nil)                                                      // Set state to indicate confirmation user exists
 
-	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", 75.0, true)
+	confirmation, err := smartContract.TransferMoney(transactionContext, "srcAccount", "dstAccount", "75.0", "true")
 	require.True(t, confirmation)
 	require.Nil(t, err)
 }
