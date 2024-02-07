@@ -3,7 +3,6 @@ package handler
 import (
 	jwtUtil "app/jwt"
 	"app/utils"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"log"
@@ -30,19 +29,13 @@ func (h *Handler) Login(ctx *gin.Context) {
 }
 
 func (h *Handler) InitLedger(ctx *gin.Context) {
-	token, err := jwtUtil.ExtractAndValidateToken(ctx)
-	if err != nil {
-		ctx.JSON(401, gin.H{"error": "Unauthorized - Invalid token"})
+	userIdEntry, ok := ctx.Get("userId")
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "no auth parameters provided"})
 		return
 	}
+	userId := userIdEntry.(string)
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		ctx.JSON(401, gin.H{"error": "Unauthorized - Invalid token claims"})
-		return
-	}
-
-	userId := claims["userId"].(string)
 	userOrg := h.Users[userId]
 	channel := "channel1"
 	chaincodeId := "bankchaincode1"

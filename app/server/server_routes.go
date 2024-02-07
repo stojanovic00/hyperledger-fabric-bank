@@ -2,6 +2,7 @@ package server
 
 import (
 	"app/handler"
+	"app/jwt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,7 +11,7 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 	handler.Users = s.SetupUsers()
 
 	// ROUTES
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	router := gin.Default()
 
 	router.NoRoute(func(c *gin.Context) {
@@ -18,9 +19,13 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 	})
 
 	//curl -X POST http://localhost:8080/login/someUserId
-	//curl -X POST http://localhost:8080/initLedger -H "Authorization:$token"
-	router.POST("/initLedger", handler.InitLedger)
+	//Unauthorized
 	router.POST("/login/:userID", handler.Login)
+
+	//Authorized
+	//curl -X POST http://localhost:8080/init-ledger -H "Authorization:$token"
+	router.Use(jwt.AuthMiddleware())
+	router.POST("/init-ledger", handler.InitLedger)
 
 	s.Router = router
 	return nil

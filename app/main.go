@@ -34,8 +34,8 @@ func main() {
 		ReadHeaderTimeout: 100 * time.Millisecond,
 		MaxHeaderBytes:    2048,
 	}
-	app.Config.Host = "localhost"
-	app.Config.Port = "8080"
+	app.Config.Host = app.Config.Host
+	app.Config.Port = app.Config.Port
 
 	fmt.Printf("server started at %s:%s", app.Config.Host, app.Config.Port)
 

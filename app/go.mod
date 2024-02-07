@@ -22,5 +22,4 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/hyperledger/fabric-sdk-go v1.0.0
 	github.com/jessevdk/go-flags v1.4.0
-	github.com/joho/godotenv v1.5.1
 )
