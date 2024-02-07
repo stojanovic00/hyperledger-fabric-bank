@@ -29,9 +29,9 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 		{ID: "u4", Name: "Eva", Surname: "Williams", Email: "eva.williams@gmail.com"},
 		{ID: "u5", Name: "Daniel", Surname: "Miller", Email: "daniel.miller@gmail.com"},
 		{ID: "u6", Name: "Sophia", Surname: "Brown", Email: "sophia.brown@gmail.com"},
-		{ID: "u7", Name: "Matthew", Surname: "Davis", Email: "matthew.davis@gmail.com"},
+		{ID: "u7", Name: "John", Surname: "Davis", Email: "matthew.davis@gmail.com"},
 		{ID: "u8", Name: "Olivia", Surname: "Jones", Email: "olivia.jones@gmail.com"},
-		{ID: "u9", Name: "Michael", Surname: "Clark", Email: "michael.clark@gmail.com"},
+		{ID: "u9", Name: "Michael", Surname: "Smith", Email: "michael.clark@gmail.com"},
 		{ID: "u10", Name: "Emma", Surname: "Garcia", Email: "emma.garcia@gmail.com"},
 		{ID: "u11", Name: "William", Surname: "Hill", Email: "william.hill@gmail.com"},
 		{ID: "u12", Name: "Ava", Surname: "Martinez", Email: "ava.martinez@gmail.com"},
@@ -334,4 +334,125 @@ func StringToCurrency(currencyStr string) (model.Currency, error) {
 	default:
 		return 0, fmt.Errorf("invalid currency string: %s", currencyStr)
 	}
+}
+func (s *SmartContract) GetUsersByName(ctx contractapi.TransactionContextInterface, name string) ([]model.User, error) {
+	queryString := fmt.Sprintf(`{
+		"selector": {
+			"name": "%s"
+		}
+	}`, name)
+
+	queryResults, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %v", err)
+	}
+	defer queryResults.Close()
+
+	var users []model.User
+	for queryResults.HasNext() {
+		queryResult, err := queryResults.Next()
+		if err != nil {
+			return nil, fmt.Errorf("failed to iterate query results: %v", err)
+		}
+
+		var user model.User
+		if err := json.Unmarshal(queryResult.Value, &user); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal user: %v", err)
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func (s *SmartContract) GetUsersBySurname(ctx contractapi.TransactionContextInterface, surname string) ([]model.User, error) {
+	queryString := fmt.Sprintf(`{
+		"selector": {
+			"surname": "%s"
+		}
+	}`, surname)
+
+	queryResults, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %v", err)
+	}
+	defer queryResults.Close()
+
+	var users []model.User
+	for queryResults.HasNext() {
+		queryResult, err := queryResults.Next()
+		if err != nil {
+			return nil, fmt.Errorf("failed to iterate query results: %v", err)
+		}
+
+		var user model.User
+		if err := json.Unmarshal(queryResult.Value, &user); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal user: %v", err)
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func (s *SmartContract) GetByBankAccountId(ctx contractapi.TransactionContextInterface, accId string) (model.User, error) {
+	accountJSON, err := ctx.GetStub().GetState(accId)
+	if err != nil {
+		return model.User{}, fmt.Errorf("failed to read from world state: %v", err)
+	}
+
+	var account model.BankAccount
+	err = json.Unmarshal(accountJSON, &account)
+
+	if err != nil {
+		return model.User{}, err
+	}
+
+	userJSON, err := ctx.GetStub().GetState(account.UserID)
+	if err != nil {
+		return model.User{}, fmt.Errorf("failed to read from world state: %v", err)
+	}
+
+	var user model.User
+	err = json.Unmarshal(userJSON, &user)
+
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
+}
+
+func (s *SmartContract) GetUsersBySurnameAndEmail(ctx contractapi.TransactionContextInterface, surname, email string) ([]*model.User, error) {
+	queryString := fmt.Sprintf(`{
+		"selector": {
+			"surname": "%s",
+			"email": "%s"
+		}
+	}`, surname, email)
+
+	queryResults, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %v", err)
+	}
+	defer queryResults.Close()
+
+	var users []*model.User
+	for queryResults.HasNext() {
+		queryResult, err := queryResults.Next()
+		if err != nil {
+			return nil, fmt.Errorf("failed to iterate query results: %v", err)
+		}
+
+		var user model.User
+		if err := json.Unmarshal(queryResult.Value, &user); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal user: %v", err)
+		}
+
+		users = append(users, &user)
+	}
+
+	return users, nil
 }
