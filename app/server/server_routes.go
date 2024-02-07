@@ -28,8 +28,8 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 
 func (s *Server) SetupUsers() map[string]string {
 	users := map[string]string{
-		"u1": "ORG1",
-		"u2": "ORG2",
+		"u1": "org1",
+		"u2": "org2",
 		// Add more users as needed
 	}
 

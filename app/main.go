@@ -13,7 +13,11 @@ import (
 )
 
 func main() {
-	//Loads config and instantiates all dependencies
+	err := os.Setenv("DISCOVERY_AS_LOCALHOST", "true")
+	if err != nil {
+		log.Fatalf("Error setting DISCOVERY_AS_LOCALHOST environemnt variable: %v", err)
+	}
+
 	app, err := server.NewServer()
 	if err != nil {
 		log.Fatalf(err.Error())
