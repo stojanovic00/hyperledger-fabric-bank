@@ -11,4 +11,5 @@
 
 # Go 
 chaincode/vendor/
-
+*.work
+*.work.sum

@@ -4,6 +4,7 @@ import (
 	"app/handler"
 	"app/jwt"
 	"app/model"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -54,6 +55,8 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 		    }'
 	*/
 	router.POST("/transfer-money/:channel", jwt.AuthorizationMiddleware("USER"), handler.TransferMoney)
+
+	router.GET("/search/:channel/:by/:param1/:param2", jwt.AuthorizationMiddleware("ADMIN"), handler.Query)
 
 	s.Router = router
 	return nil

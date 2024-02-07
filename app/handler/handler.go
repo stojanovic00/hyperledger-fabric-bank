@@ -5,6 +5,7 @@ import (
 	jwtUtil "app/jwt"
 	"app/model"
 	"app/utils"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -279,4 +280,97 @@ func (h *Handler) TransferMoney(ctx *gin.Context) {
 	log.Println(resultMsg)
 
 	ctx.JSON(http.StatusOK, gin.H{"message": resultMsg})
+}
+
+func (h *Handler) Query(ctx *gin.Context) {
+	by := ctx.Param("by")
+	param1 := ctx.Param("param1")
+
+	if by == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "query parameter 'by' is required"})
+		return
+	}
+
+	if param1 == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "query parameter 'param1' is required"})
+		return
+	}
+
+	channel := ctx.Param("channel")
+	if channel == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "channel is required"})
+		return
+	}
+
+	chaincodeID := h.ChainCodes[channel]
+
+	userIDEntry, _ := ctx.Get("userId")
+	userID := userIDEntry.(string)
+
+	userInfo := h.Users[userID]
+	wallet, err := utils.CreateWallet(userID, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create or populate wallet"})
+		return
+	}
+
+	gw, err := utils.ConnectToGateway(wallet, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to connect to gateway"})
+		return
+	}
+	defer gw.Close()
+
+	network, err := gw.GetNetwork(channel)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get network"})
+		return
+	}
+
+	contract := network.GetContract(chaincodeID)
+
+	var result []byte
+	switch by {
+	case "name":
+		result, err = contract.EvaluateTransaction("GetUsersByName", param1)
+	case "surname":
+		result, err = contract.EvaluateTransaction("GetUsersBySurname", param1)
+	case "account":
+		result, err = contract.EvaluateTransaction("GetByBankAccountId", param1)
+	case "both":
+		param2 := ctx.Param("param2")
+		result, err = contract.EvaluateTransaction("GetUsersBySurnameAndEmail", param1, param2)
+	default:
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "unsupported query parameter 'by'"})
+		return
+	}
+
+	if by == "account" {
+		var user model.User
+		if err := json.Unmarshal(result, &user); err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{"user": user})
+	} else {
+		var users []model.User
+		if err := json.Unmarshal(result, &users); err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{"users": users})
+	}
+
 }
