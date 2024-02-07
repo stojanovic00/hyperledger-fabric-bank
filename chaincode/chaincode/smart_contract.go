@@ -432,7 +432,7 @@ func (s *SmartContract) GetByBankAccountId(ctx contractapi.TransactionContextInt
 	return user, nil
 }
 
-func (s *SmartContract) GetUsersBySurnameAndEmail(ctx contractapi.TransactionContextInterface, surname, email string) ([]*model.User, error) {
+func (s *SmartContract) GetUsersBySurnameAndEmail(ctx contractapi.TransactionContextInterface, surname, email string) ([]model.User, error) {
 	queryString := fmt.Sprintf(`{
 		"selector": {
 			"surname": "%s",
@@ -446,7 +446,7 @@ func (s *SmartContract) GetUsersBySurnameAndEmail(ctx contractapi.TransactionCon
 	}
 	defer queryResults.Close()
 
-	var users []*model.User
+	var users []model.User
 	for queryResults.HasNext() {
 		queryResult, err := queryResults.Next()
 		if err != nil {
@@ -458,7 +458,7 @@ func (s *SmartContract) GetUsersBySurnameAndEmail(ctx contractapi.TransactionCon
 			return nil, fmt.Errorf("failed to unmarshal user: %v", err)
 		}
 
-		users = append(users, &user)
+		users = append(users, user)
 	}
 
 	return users, nil
