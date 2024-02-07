@@ -174,7 +174,7 @@ function createOrgs() {
   infoln "Generating docker-compose file for the network"
   generatePeersAndOrdererComposeFile
 
-  infoln "Generating CCP files for Org1-$ORGANIZATION_NUMBER"
+  infoln "Generating CCP files for Org$ORGANIZATION_NUMBER"
   ${ORGANIZATIONS_PATH}/ccp-generate.sh $ORGANIZATION_NUMBER $PEER_PER_ORGANIZATION_NUMBER
 }
 
