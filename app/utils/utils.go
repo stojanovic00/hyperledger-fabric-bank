@@ -7,19 +7,23 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"strings"
 )
 
-func PopulateWallet(wallet *gateway.Wallet) error {
+func PopulateWallet(wallet *gateway.Wallet, org string) error {
 	log.Println("============ Populating wallet ============")
+	orgPath := fmt.Sprintf("%s.example.com", org)
+	usrPath := fmt.Sprintf("User1@%s.example.com", org)
+	orgMSP := strings.ToUpper(org[:1]) + org[1:]
+
 	credPath := filepath.Join(
 		"..",
-		"..",
-		"test-network",
+		"infrastructure",
 		"organizations",
 		"peerOrganizations",
-		"org1.example.com",
+		orgPath,
 		"users",
-		"User1@org1.example.com",
+		usrPath,
 		"msp",
 	)
 
@@ -45,9 +49,9 @@ func PopulateWallet(wallet *gateway.Wallet) error {
 		return err
 	}
 
-	identity := gateway.NewX509Identity("Org1MSP", string(cert), string(key))
+	identity := gateway.NewX509Identity(fmt.Sprintf("%sMSP", orgMSP), string(cert), string(key))
 
-	return wallet.Put("appUser", identity)
+	return wallet.Put("usr1", identity)
 }
 
 func CreateWallet(userId, userOrg string) (*gateway.Wallet, error) {
@@ -59,7 +63,7 @@ func CreateWallet(userId, userOrg string) (*gateway.Wallet, error) {
 	}
 
 	if !wallet.Exists(userId) {
-		err = PopulateWallet(wallet)
+		err = PopulateWallet(wallet, userOrg)
 		if err != nil {
 			log.Fatalf("Failed to populate wallet contents: %v", err)
 			return nil, err
@@ -69,20 +73,21 @@ func CreateWallet(userId, userOrg string) (*gateway.Wallet, error) {
 	return wallet, nil
 }
 
-func ConnectToGateway(wallet *gateway.Wallet) (*gateway.Gateway, error) {
+func ConnectToGateway(wallet *gateway.Wallet, org string) (*gateway.Gateway, error) {
+	orgPath := fmt.Sprintf("%s.example.com", org)
+	connection := fmt.Sprintf("connection-%s.json", org)
 	ccpPath := filepath.Join(
 		"..",
-		"..",
-		"test-network",
+		"infrastructure",
 		"organizations",
 		"peerOrganizations",
-		"org1.example.com",
-		"connection-org1.yaml",
+		orgPath,
+		connection,
 	)
 
 	gw, err := gateway.Connect(
 		gateway.WithConfig(config.FromFile(filepath.Clean(ccpPath))),
-		gateway.WithIdentity(wallet, "appUser"),
+		gateway.WithIdentity(wallet, "usr1"),
 	)
 	if err != nil {
 		log.Fatalf("Failed to connect to gateway: %v", err)
