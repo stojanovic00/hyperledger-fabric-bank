@@ -429,3 +429,63 @@ func (h *Handler) MoneyWithdrawal(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"message": resultMsg})
 }
+
+func (h *Handler) MoneyDepositToAccount(ctx *gin.Context) {
+	var transfer struct {
+		Amount string `json:"amount"`
+	}
+
+	if err := ctx.ShouldBindJSON(&transfer); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "couldn't resolve body"})
+		return
+	}
+
+	channel := ctx.Param("channel")
+	if channel == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "channel is required"})
+		return
+	}
+	chaincodeID := h.ChainCodes[channel]
+
+	userIdContext, _ := ctx.Get("userId")
+	userId := fmt.Sprintf("%v", userIdContext)
+
+	userInfo := h.Users[userId]
+
+	wallet, err := utils.CreateWallet(userId, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or populate wallet"})
+		return
+	}
+
+	gw, err := utils.ConnectToGateway(wallet, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to gateway"})
+		return
+	}
+	defer gw.Close()
+
+	network, err := gw.GetNetwork(channel)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get network"})
+		return
+	}
+
+	contract := network.GetContract(chaincodeID)
+
+	log.Println("Submit Transaction: MoneyDepositToAccount")
+	response, err := contract.SubmitTransaction("MoneyDepositToAccount", userId, transfer.Amount)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	responseStr := string(response)
+	var resultMsg string
+	if responseStr == "true" {
+		resultMsg = "Money withdrawal successful."
+	}
+	log.Println(resultMsg)
+
+	ctx.JSON(http.StatusOK, gin.H{"message": resultMsg})
+}

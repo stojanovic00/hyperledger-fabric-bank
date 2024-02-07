@@ -228,7 +228,6 @@ func (s *SmartContract) TransferMoney(ctx contractapi.TransactionContextInterfac
 }
 
 func (s *SmartContract) MoneyWithdrawal(ctx contractapi.TransactionContextInterface, usrID string, amount float64) (bool, error) {
-	println("------------")
 	bankAccount, err := s.GetBankAccountByUser(ctx, usrID)
 	if err != nil {
 		return false, err
@@ -244,7 +243,6 @@ func (s *SmartContract) MoneyWithdrawal(ctx contractapi.TransactionContextInterf
 	if account.Balance < amount {
 		return false, fmt.Errorf("Insufficient funds")
 	}
-	println("------------")
 
 	account.Balance = account.Balance - amount
 
@@ -261,8 +259,10 @@ func (s *SmartContract) MoneyWithdrawal(ctx contractapi.TransactionContextInterf
 	return true, nil
 }
 
-func (s *SmartContract) MoneyDepositToAccount(ctx contractapi.TransactionContextInterface, acc string, amount float64) (bool, error) {
-	account, err := s.ReadBankAccount(ctx, acc)
+func (s *SmartContract) MoneyDepositToAccount(ctx contractapi.TransactionContextInterface, usrID string, amount float64) (bool, error) {
+	bankAccount, err := s.GetBankAccountByUser(ctx, usrID)
+
+	account, err := s.ReadBankAccount(ctx, bankAccount.ID)
 	fmt.Printf("MoneyDepositToAccount: ReadBankAccount result - Account: %+v, Error: %+v\n", account, err)
 
 	account.Balance = account.Balance + amount
