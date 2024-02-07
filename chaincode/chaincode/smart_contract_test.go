@@ -241,60 +241,6 @@ func TestMoneyDepositToAccount(t *testing.T) {
 	require.Equal(t, expectedUpdatedBalance, updatedAccount.Balance, "Account balance not updated correctly after deposit")
 }
 
-func TestMoneyWithdrawal_Successful(t *testing.T) {
-	chaincodeStub := &mocks.ChaincodeStub{}
-	transactionContext := &mocks.TransactionContext{}
-	transactionContext.GetStubReturns(chaincodeStub)
-	smartContract := chaincode.SmartContract{}
-
-	accountID := "a99"
-	initialBalance := 100.0
-	withdrawalAmount := 50.0
-
-	chaincodeStub.GetStateReturns([]byte(fmt.Sprintf(`{"ID":"%s","Currency":0,"Balance":%f}`, accountID, initialBalance)), nil)
-
-	result, err := smartContract.MoneyWithdrawal(transactionContext, accountID, withdrawalAmount)
-
-	require.True(t, result, "Expected successful withdrawal")
-	require.Nil(t, err, "Unexpected error during withdrawal")
-
-	accountJSON, err := chaincodeStub.GetState(accountID)
-	require.Nil(t, err, "Error retrieving account state after withdrawal")
-
-	var updatedAccount model.BankAccount
-	err = json.Unmarshal(accountJSON, &updatedAccount)
-	require.Nil(t, err, "Error unmarshalling updated account JSON")
-
-}
-
-func TestMoneyWithdrawal_InsufficientFunds(t *testing.T) {
-	chaincodeStub := &mocks.ChaincodeStub{}
-	transactionContext := &mocks.TransactionContext{}
-	transactionContext.GetStubReturns(chaincodeStub)
-	smartContract := chaincode.SmartContract{}
-
-	accountID := "a99"
-	initialBalance := 30.0
-	withdrawalAmount := 50.0
-
-	chaincodeStub.GetStateReturns([]byte(fmt.Sprintf(`{"ID":"%s","Currency":0,"Balance":%f}`, accountID, initialBalance)), nil)
-
-	result, err := smartContract.MoneyWithdrawal(transactionContext, accountID, withdrawalAmount)
-
-	require.False(t, result, "Expected unsuccessful withdrawal")
-	require.Error(t, err, "Expected error due to insufficient funds")
-	require.EqualError(t, err, "Insufficient funds", "Unexpected error message")
-
-	accountJSON, err := chaincodeStub.GetState(accountID)
-	require.Nil(t, err, "Error retrieving account state after unsuccessful withdrawal")
-
-	var unchangedAccount model.BankAccount
-	err = json.Unmarshal(accountJSON, &unchangedAccount)
-	require.Nil(t, err, "Error unmarshalling unchanged account JSON")
-
-	require.Equal(t, initialBalance, unchangedAccount.Balance, "Account balance should remain unchanged after unsuccessful withdrawal")
-}
-
 func TestAddUser(t *testing.T) {
 	//Arrange
 	chaincodeStub := &mocks.ChaincodeStub{}

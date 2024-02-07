@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 )
 
 type Handler struct {
@@ -89,17 +88,13 @@ func (h *Handler) InitLedger(ctx *gin.Context) {
 
 	contract := network.GetContract(chaincodeId)
 	log.Println("Submit Transaction: InitLedger")
-	_, err = h.submitTransaction(contract, "InitLedger")
+	_, err = contract.SubmitTransaction("InitLedger")
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to submit transaction"})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "ledger initialized"})
-}
-
-func (h *Handler) submitTransaction(contract *gateway.Contract, transaction string) ([]byte, error) {
-	return contract.SubmitTransaction(transaction)
 }
 
 func (h *Handler) AddUser(ctx *gin.Context) {
@@ -373,4 +368,64 @@ func (h *Handler) Query(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"users": users})
 	}
 
+}
+
+func (h *Handler) MoneyWithdrawal(ctx *gin.Context) {
+	var transfer struct {
+		Amount string `json:"amount"`
+	}
+
+	if err := ctx.ShouldBindJSON(&transfer); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "couldn't resolve body"})
+		return
+	}
+
+	channel := ctx.Param("channel")
+	if channel == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "channel is required"})
+		return
+	}
+	chaincodeID := h.ChainCodes[channel]
+
+	userIdContext, _ := ctx.Get("userId")
+	userId := fmt.Sprintf("%v", userIdContext)
+
+	userInfo := h.Users[userId]
+
+	wallet, err := utils.CreateWallet(userId, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or populate wallet"})
+		return
+	}
+
+	gw, err := utils.ConnectToGateway(wallet, userInfo.Organization)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to gateway"})
+		return
+	}
+	defer gw.Close()
+
+	network, err := gw.GetNetwork(channel)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get network"})
+		return
+	}
+
+	contract := network.GetContract(chaincodeID)
+
+	log.Println("Submit Transaction: MoneyWithdrawal")
+	response, err := contract.SubmitTransaction("MoneyWithdrawal", userId, transfer.Amount)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	responseStr := string(response)
+	var resultMsg string
+	if responseStr == "true" {
+		resultMsg = "Money withdrawal successful."
+	}
+	log.Println(resultMsg)
+
+	ctx.JSON(http.StatusOK, gin.H{"message": resultMsg})
 }

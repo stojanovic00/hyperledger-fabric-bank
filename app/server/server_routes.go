@@ -24,38 +24,13 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 		c.JSON(404, gin.H{"message": "Endpoint doesn't exist"})
 	})
 
-	//curl -X POST http://localhost:8080/login/someUserId
-	//Unauthorized
 	router.POST("/login/:userID", handler.Login)
 
-	//Authorized
-	//curl -X POST http://localhost:8080/init-ledger -H "Authorization:$token"
 	router.Use(jwt.AuthenticationMiddleware())
-	//Ledger initialization moved to run.sh
-	//router.POST("/init-ledger/:channel", jwt.AuthorizationMiddleware("ADMIN"), handler.InitLedger)
 	router.POST("/add-user/:channel", jwt.AuthorizationMiddleware("ADMIN"), handler.AddUser)
-
-	/*
-		curl -X POST http://localhost:8080/ \
-		-H "Authorization: $token" \
-		-d '{"id": "a123", "currency": 0,
-		"cards": ["Visa"], "bankId": "b1", "userID": "u1"}'
-	*/
 	router.POST("/create-bank-account/:channel", jwt.AuthorizationMiddleware("USER"), handler.CreateBankAccount)
-
-	/*
-			curl -X POST http://localhost:8080/transfer-money/channel1 \
-		    -H "Authorization: Bearer <your-token>" \
-		    -H "Content-Type: application/json" \
-		    -d '{
-		        "srcAccount": "",
-		        "dstAccount": "",
-		        "amountStr": "100.50",
-		        "confirmationStr": "true"
-		    }'
-	*/
 	router.POST("/transfer-money/:channel", jwt.AuthorizationMiddleware("USER"), handler.TransferMoney)
-
+	router.POST("/money-withdrawal/:channel", jwt.AuthorizationMiddleware("USER"), handler.MoneyWithdrawal)
 	router.GET("/search/:channel/:by/:param1/:param2", jwt.AuthorizationMiddleware("ADMIN"), handler.Query)
 
 	s.Router = router
