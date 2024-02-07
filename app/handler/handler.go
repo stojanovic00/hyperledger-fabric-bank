@@ -3,6 +3,7 @@ package handler
 import (
 	"app/dto"
 	jwtUtil "app/jwt"
+	"app/model"
 	"app/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
@@ -11,7 +12,7 @@ import (
 )
 
 type Handler struct {
-	Users      map[string]string
+	Users      map[string]model.UserInfo
 	ChainCodes map[string]string
 }
 
@@ -22,7 +23,19 @@ func (h *Handler) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := jwtUtil.GenerateJWT(userID)
+	userInfo, exists := h.Users[userID]
+	if !exists {
+		ctx.JSON(404, gin.H{"error": "user not found"})
+		return
+	}
+	var role string
+	if userInfo.Admin {
+		role = "ADMIN"
+	} else {
+		role = "USER"
+	}
+
+	token, err := jwtUtil.GenerateJWT(userInfo.UserId, role)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to generate JWT token"})
 		return
@@ -39,7 +52,7 @@ func (h *Handler) InitLedger(ctx *gin.Context) {
 	}
 	userId := userIdEntry.(string)
 
-	userOrg := h.Users[userId]
+	userInfo := h.Users[userId]
 
 	channel := ctx.Param("channel")
 	if channel == "" {
@@ -49,13 +62,13 @@ func (h *Handler) InitLedger(ctx *gin.Context) {
 
 	chaincodeId := h.ChainCodes[channel]
 
-	wallet, err := utils.CreateWallet(userId, userOrg)
+	wallet, err := utils.CreateWallet(userId, userInfo.Organization)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to create or populate wallet"})
 		return
 	}
 
-	gw, err := utils.ConnectToGateway(wallet, userOrg)
+	gw, err := utils.ConnectToGateway(wallet, userInfo.Organization)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to connect to gateway"})
 		return
@@ -84,6 +97,16 @@ func (h *Handler) submitTransaction(contract *gateway.Contract, transaction stri
 }
 
 func (h *Handler) AddUser(ctx *gin.Context) {
+	//Admins info
+	userIdEntry, ok := ctx.Get("userId")
+	if !ok {
+		ctx.JSON(400, gin.H{"error": "no auth parameters provided"})
+		return
+	}
+	adminId := userIdEntry.(string)
+	adminUserInfo := h.Users[adminId]
+
+	//Chaincode info
 	var user dto.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "couldn't resolve body"})
@@ -97,16 +120,13 @@ func (h *Handler) AddUser(ctx *gin.Context) {
 	}
 	chaincodeId := h.ChainCodes[channel]
 
-	userId := "u1"
-	userOrg := h.Users[userId]
-
-	wallet, err := utils.CreateWallet(userId, userOrg)
+	wallet, err := utils.CreateWallet(adminId, adminUserInfo.Organization)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to create or populate wallet"})
 		return
 	}
 
-	gw, err := utils.ConnectToGateway(wallet, userOrg)
+	gw, err := utils.ConnectToGateway(wallet, adminUserInfo.Organization)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Failed to connect to gateway"})
 		return
@@ -126,6 +146,14 @@ func (h *Handler) AddUser(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "user already exists"})
 		return
 	}
+
+	//Register it also in SDK app
+	newUserInfo := model.UserInfo{
+		UserId:       user.Id,
+		Organization: adminUserInfo.Organization,
+		Admin:        false,
+	}
+	h.Users[user.Id] = newUserInfo
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "added user"})
 }
