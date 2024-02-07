@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"app/dto"
 	jwtUtil "app/jwt"
 	"app/utils"
 	"github.com/gin-gonic/gin"
@@ -80,4 +81,51 @@ func (h *Handler) InitLedger(ctx *gin.Context) {
 
 func (h *Handler) submitTransaction(contract *gateway.Contract, transaction string) ([]byte, error) {
 	return contract.SubmitTransaction(transaction)
+}
+
+func (h *Handler) AddUser(ctx *gin.Context) {
+	var user dto.User
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "couldn't resolve body"})
+		return
+	}
+
+	channel := ctx.Param("channel")
+	if channel == "" {
+		ctx.JSON(400, gin.H{"error": "channel is required"})
+		return
+	}
+	chaincodeId := h.ChainCodes[channel]
+
+	userId := "u1"
+	userOrg := h.Users[userId]
+
+	wallet, err := utils.CreateWallet(userId, userOrg)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to create or populate wallet"})
+		return
+	}
+
+	gw, err := utils.ConnectToGateway(wallet, userOrg)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to connect to gateway"})
+		return
+	}
+	defer gw.Close()
+
+	network, err := gw.GetNetwork(channel)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to get network"})
+		return
+	}
+
+	contract := network.GetContract(chaincodeId)
+	log.Println("Submit Transaction: AddUser")
+	_, err = contract.SubmitTransaction("AddUser", user.Id, user.Name, user.Surname, user.Email)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "user already exists"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "added user"})
 }
