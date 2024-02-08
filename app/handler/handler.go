@@ -269,6 +269,8 @@ func (h *Handler) TransferMoney(ctx *gin.Context) {
 	var resultMsg string
 	if responseStr == "true" {
 		resultMsg = "Successful money transfer"
+	} else {
+		resultMsg = "Different currencies, you have to confirm conversion"
 	}
 	log.Println(resultMsg)
 

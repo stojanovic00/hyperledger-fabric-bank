@@ -13,3 +13,4 @@
 chaincode/vendor/
 *.work
 *.work.sum
+/app/wallet
