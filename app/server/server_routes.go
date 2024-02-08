@@ -33,6 +33,7 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 	router.POST("/money-withdrawal/:channel", jwt.AuthorizationMiddleware("USER"), handler.MoneyWithdrawal)
 	router.POST("/money-deposit/:channel", jwt.AuthorizationMiddleware("USER"), handler.MoneyDepositToAccount)
 	router.GET("/search/:channel/:by/:param1/:param2", jwt.AuthorizationMiddleware("ADMIN"), handler.Query)
+	router.GET("/search-accounts/:channel/:bank-id/:currency/:balance-thresh", jwt.AuthorizationMiddleware("ADMIN"), handler.GetAccountsByBankDesiredCurrencyAndBalance)
 
 	s.Router = router
 	return nil
