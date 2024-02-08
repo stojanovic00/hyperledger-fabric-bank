@@ -542,3 +542,46 @@ func (s *SmartContract) GetAccountsByBankDesiredCurrencyAndBalance(ctx contracta
 
 	return bankAccounts, nil
 }
+
+func (s *SmartContract) GetAccountByBankDesiredCurrencyAndMaxBalance(ctx contractapi.TransactionContextInterface, bankId, currency string) (model.BankAccount, error) {
+	var currencyEnum model.Currency
+	switch strings.ToUpper(currency) {
+	case "EUR":
+		currencyEnum = model.EUR
+	case "RSD":
+		currencyEnum = model.RSD
+	}
+
+	queryString := fmt.Sprintf(`{
+       "selector": {
+          "bank" : {
+            "ID" : "%s"
+          },
+          "currency": %d
+       },
+       "sort": [{"balance": "desc"}],
+       "limit": 1
+     }`, bankId, currencyEnum)
+
+	queryResults, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return model.BankAccount{}, fmt.Errorf("failed to execute query: %v", err)
+	}
+	defer queryResults.Close()
+
+	if !queryResults.HasNext() {
+		return model.BankAccount{}, fmt.Errorf("No accounts found")
+	}
+
+	queryResult, err := queryResults.Next()
+	if err != nil {
+		return model.BankAccount{}, fmt.Errorf("failed to get query result: %v", err)
+	}
+
+	var bankAccount model.BankAccount
+	if err := json.Unmarshal(queryResult.Value, &bankAccount); err != nil {
+		return model.BankAccount{}, fmt.Errorf("failed to unmarshal bank account: %v", err)
+	}
+
+	return bankAccount, nil
+}

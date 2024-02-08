@@ -1,0 +1,9 @@
+{
+  "index": {
+    "fields": ["balance"]
+  },
+  "ddoc": "_design/indexes",
+  "name": "balance_index",
+  "type": "json"
+}
+
