@@ -13,11 +13,6 @@ import (
 )
 
 func main() {
-	err := os.Setenv("DISCOVERY_AS_LOCALHOST", "true")
-	if err != nil {
-		log.Fatalf("Error setting DISCOVERY_AS_LOCALHOST environemnt variable: %v", err)
-	}
-
 	app, err := server.NewServer()
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -37,7 +32,7 @@ func main() {
 	app.Config.Host = app.Config.Host
 	app.Config.Port = app.Config.Port
 
-	fmt.Printf("server started at %s:%s", app.Config.Host, app.Config.Port)
+	log.Printf("server started at %s:%s", app.Config.Host, app.Config.Port)
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

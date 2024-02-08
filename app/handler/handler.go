@@ -268,13 +268,12 @@ func (h *Handler) TransferMoney(ctx *gin.Context) {
 	responseStr := string(response)
 	var resultMsg string
 	if responseStr == "true" {
-		resultMsg = "I received true"
-	} else {
-		resultMsg = "I received false"
+		resultMsg = "Successful money transfer"
 	}
 	log.Println(resultMsg)
 
 	ctx.JSON(http.StatusOK, gin.H{"message": resultMsg})
+
 }
 
 func (h *Handler) Query(ctx *gin.Context) {
@@ -331,7 +330,7 @@ func (h *Handler) Query(ctx *gin.Context) {
 	case "surname":
 		result, err = contract.EvaluateTransaction("GetUsersBySurname", param1)
 	case "account":
-		result, err = contract.EvaluateTransaction("GetByBankAccountId", param1)
+		result, err = contract.EvaluateTransaction("GetUserByBankAccountId", param1)
 	case "both":
 		param2 := ctx.Param("param2")
 		result, err = contract.EvaluateTransaction("GetUsersBySurnameAndEmail", param1, param2)
@@ -343,7 +342,7 @@ func (h *Handler) Query(ctx *gin.Context) {
 	if by == "account" {
 		var user model.User
 		if err := json.Unmarshal(result, &user); err != nil {
-			fmt.Println("Error:", err)
+			log.Println("Error:", err)
 			return
 		}
 
@@ -356,7 +355,7 @@ func (h *Handler) Query(ctx *gin.Context) {
 	} else {
 		var users []model.User
 		if err := json.Unmarshal(result, &users); err != nil {
-			fmt.Println("Error:", err)
+			log.Println("Error:", err)
 			return
 		}
 
@@ -372,7 +371,8 @@ func (h *Handler) Query(ctx *gin.Context) {
 
 func (h *Handler) MoneyWithdrawal(ctx *gin.Context) {
 	var transfer struct {
-		Amount string `json:"amount"`
+		Amount        string `json:"amount"`
+		BankAccountId string `json:"bankAccountId"`
 	}
 
 	if err := ctx.ShouldBindJSON(&transfer); err != nil {
@@ -414,7 +414,7 @@ func (h *Handler) MoneyWithdrawal(ctx *gin.Context) {
 	contract := network.GetContract(chaincodeID)
 
 	log.Println("Submit Transaction: MoneyWithdrawal")
-	response, err := contract.SubmitTransaction("MoneyWithdrawal", userId, transfer.Amount)
+	response, err := contract.SubmitTransaction("MoneyWithdrawal", userId, transfer.BankAccountId, transfer.Amount)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -429,6 +429,7 @@ func (h *Handler) MoneyWithdrawal(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"message": resultMsg})
 }
+
 func (h *Handler) GetAccountsByBankDesiredCurrencyAndBalance(ctx *gin.Context) {
 	bankId := ctx.Param("bank-id")
 	currency := ctx.Param("currency")
@@ -487,7 +488,7 @@ func (h *Handler) GetAccountsByBankDesiredCurrencyAndBalance(ctx *gin.Context) {
 
 	var accounts []model.BankAccount
 	if err := json.Unmarshal(result, &accounts); err != nil {
-		fmt.Println("Error:", err)
+		log.Println("Error:", err)
 		return
 	}
 
@@ -498,6 +499,7 @@ func (h *Handler) GetAccountsByBankDesiredCurrencyAndBalance(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"accounts": accounts})
 }
+
 func (h *Handler) GetAccountByBankDesiredCurrencyAndMaxBalance(ctx *gin.Context) {
 	bankId := ctx.Param("bank-id")
 	currency := ctx.Param("currency")
@@ -550,7 +552,7 @@ func (h *Handler) GetAccountByBankDesiredCurrencyAndMaxBalance(ctx *gin.Context)
 
 	var account model.BankAccount
 	if err := json.Unmarshal(result, &account); err != nil {
-		fmt.Println("Error:", err)
+		log.Println("Error:", err)
 		return
 	}
 
@@ -564,7 +566,8 @@ func (h *Handler) GetAccountByBankDesiredCurrencyAndMaxBalance(ctx *gin.Context)
 
 func (h *Handler) MoneyDepositToAccount(ctx *gin.Context) {
 	var transfer struct {
-		Amount string `json:"amount"`
+		Amount        string `json:"amount"`
+		BankAccountId string `json:"bankAccountId"`
 	}
 
 	if err := ctx.ShouldBindJSON(&transfer); err != nil {
@@ -606,7 +609,7 @@ func (h *Handler) MoneyDepositToAccount(ctx *gin.Context) {
 	contract := network.GetContract(chaincodeID)
 
 	log.Println("Submit Transaction: MoneyDepositToAccount")
-	response, err := contract.SubmitTransaction("MoneyDepositToAccount", userId, transfer.Amount)
+	response, err := contract.SubmitTransaction("MoneyDepositToAccount", userId, transfer.BankAccountId, transfer.Amount)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
