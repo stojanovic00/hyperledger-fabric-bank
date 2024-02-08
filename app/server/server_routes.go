@@ -16,7 +16,7 @@ func (s *Server) CreateRoutersAndSetRoutes() error {
 	}
 
 	// ROUTES
-	gin.SetMode(gin.DebugMode)
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
 	router.NoRoute(func(c *gin.Context) {

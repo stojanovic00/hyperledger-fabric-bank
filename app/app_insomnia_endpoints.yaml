@@ -1,0 +1,439 @@
+_type: export
+__export_format: 4
+__export_date: 2024-02-08T13:42:25.735Z
+__export_source: insomnia.desktop.app:v8.5.1
+resources:
+  - _id: req_df3e863fa3ea49129067f606d4fee1c5
+    parentId: fld_bdc5ea0497ed42a68bc0125d27f10b53
+    modified: 1707391449084
+    created: 1707332518505
+    url: http://localhost:8080/create-bank-account/channel1
+    name: create bank account
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"id": "a32",
+        	"currency": "EUR",
+        	"cards": [
+        		"Visa"
+        	],
+        	"bankId": "b1",
+        	"userID": "u32"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_c83b61552032496fa3b6826bc49d88b4
+      - name: User-Agent
+        value: insomnia/8.5.1
+        id: pair_e769d01924454b28867e4c5e953297ac
+      - id: pair_133674d348e7422c9734e38295604ef7
+        name: Authorization
+        value: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+          'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        description: ""
+    authentication: {}
+    metaSortKey: -1707332518505
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_bdc5ea0497ed42a68bc0125d27f10b53
+    parentId: wrk_67e421590afe4627bccefa9d1cd2cd23
+    modified: 1707331230853
+    created: 1707331230853
+    name: user
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1707331230853
+    _type: request_group
+  - _id: wrk_67e421590afe4627bccefa9d1cd2cd23
+    parentId: null
+    modified: 1707301180140
+    created: 1707301180140
+    name: hyperledger
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_17fd8a1150454705be769be322642519
+    parentId: fld_bdc5ea0497ed42a68bc0125d27f10b53
+    modified: 1707391605359
+    created: 1707332951905
+    url: http://localhost:8080/transfer-money/channel1
+    name: transfer money
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"srcAccount": "a32",
+        	"dstAccount": "a2",
+        	"amountStr": "5000.00",
+        	"confirmationStr": "true"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_c83b61552032496fa3b6826bc49d88b4
+      - name: User-Agent
+        value: insomnia/8.5.1
+        id: pair_e769d01924454b28867e4c5e953297ac
+      - id: pair_133674d348e7422c9734e38295604ef7
+        name: Authorization
+        value: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+          'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        description: ""
+    authentication: {}
+    metaSortKey: -1707331866075.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_2f78568c04bb44929ad8f2ce28cc40d9
+    parentId: fld_bdc5ea0497ed42a68bc0125d27f10b53
+    modified: 1707398057595
+    created: 1707390570486
+    url: http://localhost:8080/money-deposit/channel1
+    name: money deposit
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"amount": "20000",
+        	"bankAccountId": "a1"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_c83b61552032496fa3b6826bc49d88b4
+      - name: User-Agent
+        value: insomnia/8.5.1
+        id: pair_e769d01924454b28867e4c5e953297ac
+      - id: pair_133674d348e7422c9734e38295604ef7
+        name: Authorization
+        value: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+          'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        description: ""
+    authentication: {}
+    metaSortKey: -1707331527879.75
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_2834d852552f44ef934171046aa7c078
+    parentId: fld_bdc5ea0497ed42a68bc0125d27f10b53
+    modified: 1707398051333
+    created: 1707390729567
+    url: http://localhost:8080/money-withdrawal/channel1
+    name: money withdrawal
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"amount": "20000",
+        	"bankAccountId": "a1"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_c83b61552032496fa3b6826bc49d88b4
+      - name: User-Agent
+        value: insomnia/8.5.1
+        id: pair_e769d01924454b28867e4c5e953297ac
+      - id: pair_133674d348e7422c9734e38295604ef7
+        name: Authorization
+        value: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+          'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        description: ""
+    authentication: {}
+    metaSortKey: -1707331358781.875
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_38d76c91c76649fea337af7190995d56
+    parentId: fld_401d779371e44631910ecb72e1c5d4c0
+    modified: 1707399586390
+    created: 1707301188207
+    url: localhost:8080/login/u1
+    name: login
+    description: ""
+    method: POST
+    body: {}
+    parameters: []
+    headers:
+      - name: User-Agent
+        value: insomnia/8.5.1
+    authentication: {}
+    metaSortKey: -1707332959503
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_401d779371e44631910ecb72e1c5d4c0
+    parentId: wrk_67e421590afe4627bccefa9d1cd2cd23
+    modified: 1707331204105
+    created: 1707331204105
+    name: unauthorized
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1707331204105
+    _type: request_group
+  - _id: req_067b1fecf1044497b9f024d4ce049dd5
+    parentId: fld_96fee63446054330837c52fccee53c0f
+    modified: 1707331191651
+    created: 1707301380545
+    url: localhost:8080/init-ledger/channel1
+    name: init ledger
+    description: ""
+    method: POST
+    body: {}
+    parameters: []
+    headers:
+      - name: User-Agent
+        value: insomnia/8.5.1
+        id: pair_7306f266661349048ec62cfe03d6e8ec
+      - id: pair_463e9afd8601483498a8148f32384cde
+        name: Authorization
+        value: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+          'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        description: ""
+    authentication:
+      type: bearer
+      token: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+        'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+      disabled: true
+    metaSortKey: -1707331189684
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_96fee63446054330837c52fccee53c0f
+    parentId: wrk_67e421590afe4627bccefa9d1cd2cd23
+    modified: 1707331180857
+    created: 1707331180857
+    name: admin
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1707331180857
+    _type: request_group
+  - _id: req_ce966ab1d2624d839d010d9aa71d0890
+    parentId: fld_96fee63446054330837c52fccee53c0f
+    modified: 1707399280351
+    created: 1707316088089
+    url: localhost:8080/add-user/channel1
+    name: add user
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"id": "u32",
+        	"name": "Marko",
+        	"surname": "Kontromanic",
+        	"email": "mare@gmail.com"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_bdc5415aa30442f5a343c2e8cd8132c3
+      - name: User-Agent
+        value: insomnia/8.5.1
+        id: pair_610c87d39a674157ab2d497a2110d77c
+      - id: pair_170732b890c845bd9f7e2504a411c8f1
+        name: Authorization
+        value: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+          'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        description: ""
+        disabled: false
+    authentication: {}
+    metaSortKey: -1707331189584
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_b05cdc39bc0e4a51b8960b6177ac456e
+    parentId: fld_96fee63446054330837c52fccee53c0f
+    modified: 1707399445339
+    created: 1707339074363
+    url: localhost:8080/search/channel1/:by/:param1/:param2
+    name: query
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - id: pair_06ef769ec35041d68cd23bdca6424f98
+        name: by
+        value: surname
+        description: ""
+      - id: pair_e175fb63064548e1a336ed2031d498e4
+        name: param1
+        value: Smith
+        description: ""
+      - id: pair_a24afdc8c383458082d70e2b5424d15c
+        name: param2
+        value: " "
+        description: ""
+    headers:
+      - name: User-Agent
+        value: insomnia/8.5.1
+        id: pair_610c87d39a674157ab2d497a2110d77c
+      - id: pair_170732b890c845bd9f7e2504a411c8f1
+        name: Authorization
+        value: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+          'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        description: ""
+        disabled: false
+    authentication: {}
+    metaSortKey: -1705994604782
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_87760f89e20b4d18adf0ecebf48d70c5
+    parentId: fld_96fee63446054330837c52fccee53c0f
+    modified: 1707391553794
+    created: 1707384988049
+    url: localhost:8080/search-accounts/channel1/:bank-id/:currency/:balance-thresh
+    name: query accounts
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - id: pair_06ef769ec35041d68cd23bdca6424f98
+        name: bank-id
+        value: b2
+        description: ""
+      - id: pair_e175fb63064548e1a336ed2031d498e4
+        name: currency
+        value: eur
+        description: ""
+      - id: pair_a24afdc8c383458082d70e2b5424d15c
+        name: balance-thresh
+        value: "0"
+        description: ""
+    headers:
+      - name: User-Agent
+        value: insomnia/8.5.1
+        id: pair_610c87d39a674157ab2d497a2110d77c
+      - id: pair_170732b890c845bd9f7e2504a411c8f1
+        name: Authorization
+        value: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+          'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        description: ""
+        disabled: false
+    authentication: {}
+    metaSortKey: -1705326312381
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_80e37e51642f4673bffd7f0b80628553
+    parentId: fld_96fee63446054330837c52fccee53c0f
+    modified: 1707389814800
+    created: 1707389659077
+    url: localhost:8080/max-account/channel1/:bank-id/:currency
+    name: max account per currency
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - id: pair_06ef769ec35041d68cd23bdca6424f98
+        name: bank-id
+        value: b4
+        description: ""
+      - id: pair_e175fb63064548e1a336ed2031d498e4
+        name: currency
+        value: RSD
+        description: ""
+    headers:
+      - name: User-Agent
+        value: insomnia/8.5.1
+        id: pair_610c87d39a674157ab2d497a2110d77c
+      - id: pair_170732b890c845bd9f7e2504a411c8f1
+        name: Authorization
+        value: "{% response 'body', 'req_38d76c91c76649fea337af7190995d56',
+          'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        description: ""
+        disabled: false
+    authentication: {}
+    metaSortKey: -1704992166180.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: env_af8cbbb82c2ddb879d07d84096351917a07bbcbe
+    parentId: wrk_67e421590afe4627bccefa9d1cd2cd23
+    modified: 1707301180141
+    created: 1707301180141
+    name: Base Environment
+    data: {}
+    dataPropertyOrder: null
+    color: null
+    isPrivate: false
+    metaSortKey: 1707301180141
+    _type: environment
+  - _id: jar_af8cbbb82c2ddb879d07d84096351917a07bbcbe
+    parentId: wrk_67e421590afe4627bccefa9d1cd2cd23
+    modified: 1707301180142
+    created: 1707301180142
+    name: Default Jar
+    cookies: []
+    _type: cookie_jar
