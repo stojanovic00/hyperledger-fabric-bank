@@ -1,4 +1,4 @@
-package chaincode
+package utils
 
 func EurToDin(eurAmount float64) float64 {
 	exchangeRate := 117.0
