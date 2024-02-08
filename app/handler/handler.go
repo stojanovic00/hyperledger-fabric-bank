@@ -615,7 +615,7 @@ func (h *Handler) MoneyDepositToAccount(ctx *gin.Context) {
 	responseStr := string(response)
 	var resultMsg string
 	if responseStr == "true" {
-		resultMsg = "Money withdrawal successful."
+		resultMsg = "Money deposit successful."
 	}
 	log.Println(resultMsg)
 
