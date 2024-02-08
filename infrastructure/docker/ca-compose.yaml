@@ -18,7 +18,7 @@ services:
       - 15000:15000
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/ordererOrg:/etc/hyperledger/fabric-ca-server
+      - /home/aleksandar/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/ordererOrg:/etc/hyperledger/fabric-ca-server
     container_name: ca_orderer
     networks:
       - bank_network
@@ -36,7 +36,7 @@ services:
       - 7199:7199
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org1:/etc/hyperledger/fabric-ca-server
+      - /home/aleksandar/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org1:/etc/hyperledger/fabric-ca-server
     container_name: ca_org1
     networks:
       - bank_network
@@ -54,7 +54,7 @@ services:
       - 8199:8199
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org2:/etc/hyperledger/fabric-ca-server
+      - /home/aleksandar/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org2:/etc/hyperledger/fabric-ca-server
     container_name: ca_org2
     networks:
       - bank_network
@@ -72,7 +72,7 @@ services:
       - 9199:9199
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org3:/etc/hyperledger/fabric-ca-server
+      - /home/aleksandar/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org3:/etc/hyperledger/fabric-ca-server
     container_name: ca_org3
     networks:
       - bank_network
@@ -90,7 +90,7 @@ services:
       - 10199:10199
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - /home/bojanradovic/Desktop/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org4:/etc/hyperledger/fabric-ca-server
+      - /home/aleksandar/hyperledger-fabric-bank/infrastructure/organizations/fabric-ca/org4:/etc/hyperledger/fabric-ca-server
     container_name: ca_org4
     networks:
       - bank_network
